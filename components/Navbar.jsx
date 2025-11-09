@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useContext } from 'react';
 import { CartContext } from '../context/CartContext';
 
-export default function Navbar(){
+export default function NavBar(){
   const { cart } = useContext(CartContext);
   return (
     <header className="navbar">

@@ -1,7 +1,8 @@
 
 // File: app/products/page.jsx
+"use client";
 import ProductCard from '../../components/ProductCard';
-import axios from '../../lib/axiosInstance';
+import axios from '../lib/axiosInstance';
 import { useEffect, useState, useContext } from 'react';
 import { CartContext } from '../../context/CartContext';
 

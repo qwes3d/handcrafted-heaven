@@ -1,6 +1,8 @@
 
 // File: app/sellers/[id]/page.jsx
-import axios from '../../../lib/axiosInstance';
+
+"use client";
+import axios from '../../lib/axiosInstance';
 import { useEffect, useState, useContext } from 'react';
 import SellerProduct from '../../../components/SellerProduct';
 import { CartContext } from '../../../context/CartContext';
