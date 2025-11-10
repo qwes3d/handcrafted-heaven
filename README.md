@@ -38,8 +38,31 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 
 ## Create and switch to your own branch
 
-git checkout -b dgeemdia-fullstack
+git checkout -b dgeemedia-fullstack
 
 ## Working then commiting
 git add .
 git commit -m "Implemented dashboard UI improvements"
+
+## Push to Github
+git push -u origin your-branch-name
+
+✅ Summary (cheat sheet)
+
+## Create and switch to branch	
+git checkout -b new-branch
+
+## Commit your work	
+git add . && git commit -m "message"
+
+## Push your branch	
+git push -u origin new-branch
+
+## Merge branch into main	
+git checkout main && git pull && git merge new-branch && git push
+
+## Return to your branch	
+git checkout new-branch
+
+## Reset main to your branch (if broken)	
+git checkout main && git reset --hard new-branch && git push --force
