@@ -1,26 +1,18 @@
-
-// File: app/layout.jsx
-export const metadata = { title: 'Handcrafted Haven' };
-
-import './globals.css';
+import AuthProvider from '../context/AuthContext';
 import { CartProvider } from '../context/CartContext';
-import Navbar from '../components/NavBar';
+import NavBar from '../components/NavBar';
+import './globals.css';
 
-/**
- * The root layout component for the application.
- * It wraps the entire app with the necessary HTML elements,
- * including the CartProvider and the Navbar.
- * @param {React.ReactNode} children - The content to render inside the layout.
- * @returns {React.ReactElement} - The root layout component.
- */
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <CartProvider>
-          <Navbar />
-          <main>{children}</main>
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <NavBar />
+            <main>{children}</main>
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -1,15 +1,18 @@
-
+"use client";
 // File: app/products/[id]/page.jsx
-import axios from '../../../lib/axiosInstance';
+import { useParams } from 'next/navigation';
+import axios from '../../lib/axiosInstance'; // adjust relative path if needed
 import { useEffect, useState, useContext } from 'react';
 import { CartContext } from '../../../context/CartContext';
 import Link from 'next/link';
-import RatingStars from '../../../components/RatingStars.jsx';
+import RatingStars from '../../../components/RatingStars';
 import ReviewList from '../../../components/ReviewList';
 import ReviewForm from '../../../components/ReviewForm';
 
-export default function ProductDetail({ params }) {
-  const { id } = params;
+export default function ProductDetail() {
+  const { id } = useParams(); // ✅ correct usage in Client Component
+  console.log("Product ID from params:", id);
+
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const { addToCart, cart } = useContext(CartContext);
@@ -25,7 +28,7 @@ export default function ProductDetail({ params }) {
         setLoading(false);
       }
     }
-    load();
+    if (id) load(); // ensure id is defined
   }, [id]);
 
   if (loading) return <p>Loading product...</p>;

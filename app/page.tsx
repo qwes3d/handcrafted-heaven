@@ -5,7 +5,7 @@ export default function Home() {
     <section className="hero">
       <h2>Discover Handcrafted Treasures</h2>
       <p>Explore our marketplace of unique handmade products by local artisans.</p>
-      <Link className="btn" href="/products">Shop Now</Link>
+      <Link className="text-blue-500" href="/products">Shop Now</Link>
     </section>
   );
 }
