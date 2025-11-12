@@ -1,5 +1,7 @@
 
 // File: app/cart/page.jsx
+
+"use client"
 import { useContext } from 'react';
 import { CartContext } from '../../context/CartContext';
 

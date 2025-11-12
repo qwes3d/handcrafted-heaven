@@ -1,40 +1,105 @@
-
-// File: app/products/page.jsx
 "use client";
-import ProductCard from '../../components/ProductCard';
-import axios from '../lib/axiosInstance';
-import { useEffect, useState, useContext } from 'react';
-import { CartContext } from '../../context/CartContext';
+
+import { useState, useEffect } from "react";
+import axios from "../lib/axiosInstance";
+import Link from "next/link";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const { addToCart, cart } = useContext(CartContext);
+  const [categories, setCategories] = useState([]);
+  const [sellers, setSellers] = useState([]);
 
+  // Filter state
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [sellerFilter, setSellerFilter] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+
+  // Fetch products with optional filters
   useEffect(() => {
-    async function load() {
+    async function fetchProducts() {
       try {
-        const res = await axios.get('/products');
+        let query = [];
+        if (categoryFilter) query.push(`category=${categoryFilter}`);
+        if (sellerFilter) query.push(`sellerId=${sellerFilter}`);
+        if (minPrice) query.push(`minPrice=${minPrice}`);
+        if (maxPrice) query.push(`maxPrice=${maxPrice}`);
+        const queryString = query.length ? "?" + query.join("&") : "";
+
+        const res = await axios.get(`/products${queryString}`);
         setProducts(res.data);
       } catch (err) {
         console.error(err);
-      } finally {
-        setLoading(false);
       }
     }
-    load();
-  }, []);
 
-  if (loading) return <p>Loading products...</p>;
+    fetchProducts();
+  }, [categoryFilter, sellerFilter, minPrice, maxPrice]);
+
+ useEffect(() => {
+  async function fetchMeta() {
+    try {
+      const resProducts = await axios.get("/products");
+      const allCategories = Array.from(new Set(resProducts.data.map(p => p.category).filter(Boolean)));
+      setCategories(allCategories);
+
+      const resSellers = await axios.get("/sellers");
+      setSellers(resSellers.data);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+  fetchMeta();
+}, []);
+
 
   return (
-    <div className="products-page">
-      <h2>Shop Handcrafted Creations</h2>
-      <div className="product-grid">
-        {products.map(p => (
-          <ProductCard key={p._id} product={p} addToCart={addToCart} inCart={!!cart.find(i=>i._id===p._id)} />
-        ))}
+    <section>
+      <h1>Products</h1>
+
+      {/* Filters */}
+      <div className="filters">
+        <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+          <option value="">All Categories</option>
+          {categories.map((c) => (
+            <option key={c} value={c}>{c}</option>
+          ))}
+        </select>
+
+        <select value={sellerFilter} onChange={(e) => setSellerFilter(e.target.value)}>
+          <option value="">All Sellers</option>
+          {sellers.map((s) => (
+            <option key={s.id} value={s.id}>{s.name}</option>
+          ))}
+        </select>
+
+        <input
+          type="number"
+          placeholder="Min Price"
+          value={minPrice}
+          onChange={(e) => setMinPrice(e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="Max Price"
+          value={maxPrice}
+          onChange={(e) => setMaxPrice(e.target.value)}
+        />
       </div>
-    </div>
+
+      {/* Product List */}
+      <div className="product-grid">
+        {products.map((p) => (
+          <div key={p._id} className="product-card">
+            <Link href={`/products/${p._id}`}>
+              <img src={p.images?.[0] || "/images/placeholder.jpg"} alt={p.title} />
+              <h3>{p.title}</h3>
+              <p>${p.price}</p>
+            </Link>
+          </div>
+        ))}
+        {products.length === 0 && <p>No products found.</p>}
+      </div>
+    </section>
   );
 }

@@ -29,15 +29,28 @@ export const createProduct = async (req, res) => {
 };
 
 // ==================== GET ALL PRODUCTS ====================
+// GET /products?minPrice=&maxPrice=&category=&sellerId=
 export const getProducts = async (req, res) => {
   try {
-    const { sellerId } = req.query; // <-- read query
+    const { minPrice, maxPrice, category, sellerId } = req.query;
 
     let filter = {};
 
-    // if sellerId query is provided, filter result
+    // Filter by sellerId
     if (sellerId) {
       filter.sellerId = sellerId;
+    }
+
+    // Filter by category
+    if (category) {
+      filter.category = category;
+    }
+
+    // Filter by price range
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
     }
 
     const products = await Product.find(filter);

@@ -1,5 +1,5 @@
 import AuthProvider from '../context/AuthContext';
-import { CartProvider } from '../context/CartContext';
+import  CartProvider  from '../context/CartContext';
 import NavBar from '../components/NavBar';
 import './globals.css';
 

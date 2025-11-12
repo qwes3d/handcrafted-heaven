@@ -16,7 +16,8 @@ import cartRoutes from "./routes/cartRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
-import sellerRoutes from "./routes/sellerRoutes.js";
+import sellerRoute from "./routes/sellerRoute.js";
+import sellerProductRoutes from "./routes/sellerProductRoutes.js";
 
 
 
@@ -34,7 +35,12 @@ app.use("/cart", cartRoutes);
 app.use("/orders", orderRoutes);
 app.use("/reviews", reviewRoutes);
 app.use("/contacts", contactRoutes);
-app.use("/sellers", sellerRoutes);
+app.use("/sellers", sellerRoute);
+app.use("/sellers/products", sellerProductRoutes);
+
+// for uploads
+app.use("/uploads", express.static("uploads"));
+
 
 
 // ================= DEFAULT ROUTE =================

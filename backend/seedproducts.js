@@ -15,7 +15,9 @@ const seedproduct = [
     "description": "Handmade beaded necklace crafted with traditional African multicolor beads.",
     "category": "Jewelry",
     "images": [
-      "https://example.com/beaded-necklace-1.jpg"
+      "images/beaded-necklace.jpg",
+      "images/jewelry.jpg",
+      "images/necklace1.jpg"
     ],
     "price": 35
   },
@@ -25,7 +27,8 @@ const seedproduct = [
     "description": "Hand-carved African tribal mask perfect for wall decor or cultural display.",
     "category": "Decor",
     "images": [
-      "https://example.com/tribal-mask-1.jpg"
+      "images/tribal-mask.jpg",
+      "images/decor.jpg"
     ],
     "price": 120
   },
@@ -35,7 +38,7 @@ const seedproduct = [
     "description": "Eco-friendly handwoven basket, locally crafted using natural materials.",
     "category": "Home",
     "images": [
-      "https://example.com/straw-basket-1.jpg"
+      "images/basket.jpg"
     ],
     "price": 25
   },
@@ -45,17 +48,19 @@ const seedproduct = [
     "description": "Traditional calabash cup polished and designed for cultural ceremonies or decor.",
     "category": "Accessories",
     "images": [
-      "https://example.com/calabash-cup-1.jpg"
+      "images/calabash-cup.jpg",
+      "images/calabash.jpg"
     ],
     "price": 15
   },
   {
     "sellerId": 2,
-    "title": "Beaded Wall Hanging",
+    "title": "Wall Hanging",
     "description": "Colorful beaded wall hanging to add a touch of African art to your home.",
     "category": "Decor",
     "images": [
-      "https://example.com/beaded-wall-hanging-1.jpg"
+      "images/beaded-wall.jpg",
+      "images/macrame.jpg"
     ],
     "price": 45
   },
@@ -65,9 +70,45 @@ const seedproduct = [
     "description": "Beautifully carved wooden bowl made from sustainable African hardwood.",
     "category": "Kitchenware",
     "images": [
-      "https://example.com/wooden-bowl-1.jpg"
+      "images/wooden-bowl.jpg",
+      "images/bowl.jpg",
+      "images/kitchen23.jpg"
     ],
     "price": 60
+  },
+  {
+    "sellerId": 1,
+    "title": "African Print Fabric",
+    "description": "Vibrant African print fabric perfect for clothing or home decor projects.",
+    "category": "Textiles",
+    "images": [
+      "images/textiles.jpg",
+      "images/ankara.jpg"
+    ],
+    "price": 20
+  },
+  {
+    "sellerId": 2,
+    "title": "Leather Sandals",
+    "description": "Durable handmade leather sandals inspired by traditional African designs.",
+    "category": "Footwear",
+    "images": [
+      "images/sandals.jpg",
+      "images/sandals2.jpg"
+    ],
+    "price": 80
+  },
+  {    "sellerId": 3,
+    "title": "African Drum ",
+    "description": "Authentic hand-carved djembe drum, perfect for music enthusiasts and cultural events.",
+    "category": "Musical Instruments",
+    "images": [
+      "images/djembe-drum.jpg",
+      "images/ekwe.jpg",
+      "images/ogene.jpg",
+      "images/drum.jpg"
+    ],
+    "price": 150
   }
 
 
