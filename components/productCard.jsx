@@ -1,52 +1,54 @@
-'use client';
-import Link from 'next/link';
+<article className="rounded-xl overflow-hidden shadow-lg max-w-xs mx-auto bg-white">
+  {/* Product image links to product details */}
+  <Link href={`/products/${product._id}`}>
+    <img
+      src={product.images?.[0] || '/images/placeholder.jpg'}
+      alt={product.title || product.name}
+      loading="lazy"
+      className="w-full h-64 object-cover transition-transform duration-300 hover:scale-105"
+    />
+  </Link>
 
-export default function ProductCard({ product, addToCart, inCart }) {
-  return (
-    <article className="relative rounded-xl overflow-hidden shadow-lg max-w-xs mx-auto group">
-      {/* Image */}
-      <img
-        src={product.images?.[0] || '/images/placeholder.jpg'}
-        alt={product.title || product.name}
-        className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
-      />
+  {/* Product info */}
+  <div className="p-4 text-center">
+    <h3 className="text-lg font-semibold mb-2 text-gray-900">
+      {product.title || product.name}
+    </h3>
+    <p className="text-gray-800 font-bold mb-4">${product.price}</p>
 
-      {/* Overlay with buttons */}
-      <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 gap-2 p-4">
-        <Link
-          href={`/products/${product._id}`}
-          className="w-full text-center text-white bg-blue-600 hover:bg-blue-700 py-2 rounded transition"
-        >
-          View Details
-        </Link>
+    {/* Action buttons */}
+    <div className="flex flex-col gap-2 mt-3">
+      {/* View Seller button */}
+      {product.sellerId ? (
         <Link
           href={`/sellers/${product.sellerId}`}
-          className="w-full text-center text-white bg-green-600 hover:bg-green-700 py-2 rounded transition"
+          className="block px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition duration-300 font-medium"
         >
           View Seller
         </Link>
-        {inCart ? (
-          <button
-            className="w-full text-gray-700 bg-gray-300 py-2 rounded cursor-not-allowed"
-            disabled
-          >
-            In Cart
-          </button>
-        ) : (
-          <button
-            onClick={() => addToCart(product)}
-            className="w-full text-white bg-yellow-500 hover:bg-yellow-600 py-2 rounded transition"
-          >
-            Add to Cart
-          </button>
-        )}
-      </div>
+      ) : (
+        <span className="block px-4 py-2 rounded-lg bg-gray-300 text-gray-700 cursor-not-allowed">
+          Seller Unavailable
+        </span>
+      )}
 
-      {/* Product info at bottom */}
-      <div className="p-4 bg-white">
-        <h3 className="text-lg font-semibold mb-1 text-gray-900">{product.title || product.name}</h3>
-        <p className="text-gray-800 font-bold">${product.price}</p>
-      </div>
-    </article>
-  );
-}
+      {/* Add to Cart button */}
+      {inCart ? (
+        <button
+          disabled
+          aria-disabled="true"
+          className="px-4 py-2 rounded-lg bg-gray-400 text-white cursor-not-allowed"
+        >
+          In Cart
+        </button>
+      ) : (
+        <button
+          onClick={() => addToCart(product)}
+          className="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 transition duration-300 font-medium"
+        >
+          Add to Cart
+        </button>
+      )}
+    </div>
+  </div>
+</article>

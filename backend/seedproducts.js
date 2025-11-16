@@ -93,8 +93,8 @@ const seedproduct = [
     "description": "Durable handmade leather sandals inspired by traditional African designs.",
     "category": "Footwear",
     "images": [
-      "images/sandals.jpg",
-      "images/sandals2.jpg"
+      "images/sandals.webp",
+      "images/sandals2.webp"
     ],
     "price": 80
   },

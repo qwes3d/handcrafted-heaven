@@ -1,8 +1,8 @@
 "use client";
-import axios from '../../lib/axiosInstance';
+import axios from '@/app/lib/axiosInstance';
 import { useEffect, useState, useContext } from 'react';
-import SellerProduct from '../../../components/SellerProduct';
-import { CartContext } from '../../../context/CartContext';
+import SellerProduct from '@/components/SellerProduct';
+import { CartContext } from '@/context/CartContext';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';  // <-- import the hook
 import "./seller.css";

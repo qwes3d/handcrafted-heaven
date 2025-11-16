@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import axios from "../lib/axiosInstance";
+import axios from "@/app/lib/axiosInstance";
 import Link from "next/link";
 
 export default function ProductsPage() {
