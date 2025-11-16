@@ -5,9 +5,9 @@ import axios from '@/app/lib/axiosInstance'; // adjust relative path if needed
 import { useEffect, useState, useContext } from 'react';
 import { CartContext } from '@/rev/CartContext';
 import Link from 'next/link';
-import RatingStars from '@/components/RatingStars';
-import ReviewList from '@/components/ReviewList';
-import ReviewForm from '@/components/ReviewForm';
+import RatingStars from '@/ui/RatingStars
+import ReviewList from '@/ui/ReviewList
+import ReviewForm from '@/ui/ReviewForm
 
 export default function ProductDetail() {
   const { id } = useParams(); // ✅ correct usage in Client Component

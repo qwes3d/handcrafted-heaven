@@ -2,8 +2,8 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import axios from '@/app/lib/axiosInstance';
-import ProductCarousel from '@/components/ProductCarousel';
-import CategoryCard from '@/components/CategoryCard';
+import ProductCarousel from '@/ui/ProductCarousel
+import CategoryCard from '@/ui/CategoryCard
 
 
 
