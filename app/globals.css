@@ -2,10 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-
+/* Root variables */
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --max-width: 1100px;
 }
 
 @theme inline {
@@ -22,100 +23,88 @@
   }
 }
 
+/* Body styling */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
-
-:root{ --max-width:1100px }
-body{ font-family: system-ui, sans-serif; margin:0; padding:0 }
-.navbar{ display:flex; justify-content:space-between; padding:1rem; background:#fff }
-.product-grid{ display:grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap:1rem }
-.product-card{ border:1px solid #ddd; padding:1rem }
-.btn{ display:inline-block; padding:.5rem 1rem; background:#222; color:#fff; text-decoration:none }
-
-@import "tailwindcss";
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Navigation */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  background: #fff;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Products grid */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+.product-card {
+  border: 1px solid #ddd;
+  padding: 1rem;
+}
+
+/* Buttons */
+.btn {
+  background: #111;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-ghost {
+  background: #f3f3f3;
+  color: #111;
+}
+
+.btn-danger {
+  background: #c62828;
+  color: #fff;
+}
+
+/* Seller table */
+.seller-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.seller-table th,
+.seller-table td {
+  border: 1px solid #e6e6e6;
+  padding: 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.seller-table input,
+.seller-table textarea {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.seller-table textarea {
+  min-height: 64px;
+  resize: vertical;
+}
+
+/* Responsive adjustments */
+@media (max-width: 720px) {
+  .seller-table th,
+  .seller-table td {
+    padding: 8px;
+    font-size: 14px;
   }
 }
-
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-
-:root{ --max-width:1100px }
-body{ font-family: system-ui, sans-serif; margin:0; padding:0 }
-.navbar{ display:flex; justify-content:space-between; padding:1rem; background:#fff }
-.product-grid{ display:grid; grid-template-columns: repeat(auto-fit,minmax(240px,1fr)); gap:1rem }
-.product-card{ border:1px solid #ddd; padding:1rem }
-.btn{ display:inline-block; padding:.5rem 1rem; background:#222; color:#fff; text-decoration:none }
-
-        .seller-table {
-          width: 100%;
-          border-collapse: collapse;
-        }
-        .seller-table th,
-        .seller-table td {
-          border: 1px solid #e6e6e6;
-          padding: 10px;
-          text-align: left;
-          vertical-align: top;
-        }
-        .seller-table input,
-        .seller-table textarea {
-          width: 100%;
-          padding: 6px 8px;
-          border: 1px solid #ddd;
-          border-radius: 6px;
-          box-sizing: border-box;
-        }
-        .seller-table textarea {
-          min-height: 64px;
-          resize: vertical;
-        }
-        .btn {
-          background: #111;
-          color: #fff;
-          padding: 6px 10px;
-          border-radius: 6px;
-          border: none;
-          cursor: pointer;
-        }
-        .btn-ghost {
-          background: #f3f3f3;
-          color: #111;
-        }
-        .btn-danger {
-          background: #c62828;
-          color: #fff;
-        }
-
-        @media (max-width: 720px) {
-          .seller-table th,
-          .seller-table td {
-            padding: 8px;
-            font-size: 14px;
-          }
-        }
-      

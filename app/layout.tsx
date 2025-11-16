@@ -1,5 +1,5 @@
-import AuthProvider from '../context/AuthContext'; // should be client if it uses hooks
-import CartProvider from '@/context/CartContext';
+import AuthProvider from '@/rev/AuthContext'; // should be client if it uses hooks
+import CartProvider from '@/rev/CartContext';
 import NavBar from '@/components/NavBar';
 import './globals.css';
 

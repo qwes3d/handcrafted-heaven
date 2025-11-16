@@ -1,8 +1,8 @@
 'use client'
 import Link from 'next/link';
 import { useContext } from 'react';
-import { CartContext } from '@/context/CartContext';
-import { AuthContext } from '@/context/AuthContext';
+import { CartContext } from '@/rev/CartContext';
+import { AuthContext } from '@/rev/AuthContext';
 
 export default function NavBar() {
   const { cart } = useContext(CartContext);

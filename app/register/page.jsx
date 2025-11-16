@@ -3,7 +3,7 @@
 import { useState, useContext } from "react";
 import axios from "@/app/lib/axiosInstance";
 import { useRouter } from "next/navigation";
-import { AuthContext } from "@/context/AuthContext";
+import { AuthContext } from "@/rev/AuthContext";
 
 export default function RegisterPage() {
   const { login } = useContext(AuthContext);

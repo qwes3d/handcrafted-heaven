@@ -3,7 +3,7 @@
 
 "use client"
 import { useContext } from 'react';
-import { CartContext } from '@/context/CartContext';
+import { CartContext } from '@/rev/CartContext';
 
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, total } = useContext(CartContext);

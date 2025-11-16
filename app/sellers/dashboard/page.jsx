@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState, useContext } from "react";
-import axios from "../../lib/axiosInstance";
-import { AuthContext } from "../../../context/AuthContext"; // your chosen path (root/context)
+import axios from "@/app/lib/axiosInstance";
+import { AuthContext } from "@/rev/AuthContext"; // your chosen path (root/context)
 import Image from "next/image";
-import "./seller.css";
 
 /**
  * Seller Dashboard - simple table with inline edit for:
