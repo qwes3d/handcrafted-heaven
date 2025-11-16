@@ -1,6 +1,6 @@
 
 // File: components/SellerProduct.jsx
-'use client';
+
 import Link from 'next/link';
 export default function SellerProduct({ product, addToCart, inCart }){
   return (

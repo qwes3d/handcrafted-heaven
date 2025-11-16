@@ -1,9 +1,9 @@
 'use client';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import axios from './lib/axiosInstance';
-import ProductCarousel from '../components/ProductCarousel';
-import CategoryCard from '../components/CategoryCard';
+import axios from '@/app/lib/axiosInstance';
+import ProductCarousel from '@/components/ProductCarousel';
+import CategoryCard from '@/components/CategoryCard';
 
 
 

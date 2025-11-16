@@ -1,6 +1,6 @@
 
 // File: components/ReviewForm.jsx
-'use client';
+
 import { useState } from 'react';
 export default function ReviewForm({ productId }){
   const [name, setName] = useState('');

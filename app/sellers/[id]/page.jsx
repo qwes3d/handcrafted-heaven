@@ -5,7 +5,7 @@ import SellerProduct from '@/components/SellerProduct';
 import { CartContext } from '@/context/CartContext';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';  // <-- import the hook
-//import "./seller.css";
+
 
 export default function SellerPage() {
   const params = useParams();   // <-- get params
