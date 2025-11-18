@@ -7,30 +7,11 @@ import { CartContext } from '@/rev/CartContext';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 
-interface Product {
-  sellerId: number;
-  title: string;
-  description: string;
-  category?: string;
-  images: string[];
-  price: number;
-}
-
-interface Seller {
-  id: number;
-  name: string;
-  businessName?: string;
-  image?: string;
-  bio?: string;
-  address?: string;
-  contactEmail?: string;
-  phone?: string;
-}
 
 export default function SellerPage() {
   const { id } = useParams();
   const [seller, setSeller] = useState<Seller | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<[]>([]);
   const { addToCart, cart } = useContext(CartContext);
 
   useEffect(() => {
