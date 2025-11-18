@@ -3,7 +3,7 @@
 
 import axios from '@/app/lib/axiosInstance';
 import { useEffect, useState, useContext } from 'react';
-import SellerProduct from '@/ui/SellerProduct
+import SellerProduct from '@/ui/SellerProduct';
 import { CartContext } from '@/rev/CartContext';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';  // <-- import the hook
