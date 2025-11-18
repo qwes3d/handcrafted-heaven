@@ -18,7 +18,7 @@ const productSchema = new mongoose.Schema(
     },
     category: { 
       type: String,
-      optional: true },
+      default: null },
     images: {
       type: [String], // single image
       required: true,
@@ -31,4 +31,4 @@ const productSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Product", productSchema);
+export default mongoose.models.Product || mongoose.model("Product", productSchema);
