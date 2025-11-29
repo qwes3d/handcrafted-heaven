@@ -34,10 +34,10 @@ export default function NavBar() {
             </>
           ) : (
             <>
-              <Link className="text-white hover:text-yellow-300 transition" href="/auth/login">
+              <Link className="text-white hover:text-yellow-300 transition" href="/login">
                 Login
               </Link>
-              <Link className="text-white hover:text-yellow-300 transition" href="/auth/register">
+              <Link className="text-white hover:text-yellow-300 transition" href="/register">
                 Register
               </Link>
             </>

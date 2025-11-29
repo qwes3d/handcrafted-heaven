@@ -2,44 +2,39 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import axios from '@/app/lib/axiosInstance';
+import axios from '@/lib/axiosInstance'; // ✅ your configured Axios instance
 import ProductCarousel from '@/ui/ProductCarousel';
 import CategoryCard from '@/ui/CategoryCard';
 
 /**
  * @typedef {Object} Product
  * @property {string} category
- * @property {string} [id]        // example extra field if needed
- * @property {string} [name]      // add more fields from your API response
+ * @property {string} title
+ * @property {string} description
+ * @property {number} price
+ * @property {number} discountPrice
+ * @property {string[]} images
  */
 
 export default function HomePage() {
-  /** @type {[string[], Function]} */
   const [categories, setCategories] = useState([]);
-
-  /** @type {[Product[], Function]} */
   const [topProducts, setTopProducts] = useState([]);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const resProducts = await axios.get('/products');
+        // relative API call to your Next.js app router
+        const res = await axios.get('/products');
+        const products = res.data;
 
-        /** @type {Product[]} */
-        const products = resProducts.data;
-
+        // Extract unique categories
         const allCategories = Array.from(
-          new Set(
-            products
-              .map((p) => p.category)
-              .filter(Boolean) // cleaner filter
-          )
+          new Set(products.map((p) => p.category).filter(Boolean))
         );
-
         setCategories(allCategories);
 
-        const top = products.slice(0, 10);
-        setTopProducts(top);
+        // Take top 10 products
+        setTopProducts(products.slice(0, 10));
 
       } catch (err) {
         console.error('Error fetching products:', err);

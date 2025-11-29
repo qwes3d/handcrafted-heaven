@@ -1,7 +1,7 @@
 "use client";
 // File: app/products/[id]/page.jsx
 import { useParams } from 'next/navigation';
-import axios from '@/app/lib/axiosInstance'; // adjust relative path if needed
+import axios from '@/lib/axiosInstance'; // adjust relative path if needed
 import { useEffect, useState, useContext } from 'react';
 import { CartContext } from '@/rev/CartContext';
 import Link from 'next/link';

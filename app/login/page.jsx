@@ -1,49 +1,46 @@
 "use client";
 
-import { useState, useContext } from "react";
-import axios from "@/app/lib/axiosInstance";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { AuthContext } from "@/rev/AuthContext";
+import { useState } from "react";
 
 export default function LoginPage() {
-  const { login } = useContext(AuthContext);
   const router = useRouter();
+  const [email, setEmail]     = useState("");
+  const [password, setPassword] = useState("");
 
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [loading, setLoading] = useState(false);
-
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-
-  const handleSubmit = async (e) => {
+  async function handleLogin(e) {
     e.preventDefault();
-    setLoading(true);
 
-    try {
-      const res = await axios.post("/auth/login", form);
-      login(res.data); // store user
-      router.push("/"); // redirect
-    } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.error || "Login failed");
-    } finally {
-      setLoading(false);
+    const result = await signIn("credentials", {
+      redirect: false,      // so you control redirect manually
+      email,
+      password,
+    });
+
+    if (!result || result.error) {
+      alert("Login failed");
+      return;
     }
-  };
+
+    // After signIn, fetch session or rely on the result
+    const session = await fetch("/api/auth/session").then(r => r.json());
+
+    const role = session?.user?.role;
+    if (role === "admin") {
+      router.push("/admin");
+    } else if (role === "seller") {
+      router.push("/seller/dashboard");
+    } else {
+      router.push("/");
+    }
+  }
 
   return (
-    <main style={{ padding: 20 }}>
-      <h1>Login</h1>
-      <form onSubmit={handleSubmit} style={{ maxWidth: 400 }}>
-        <label>Email:</label>
-        <input name="email" type="email" value={form.email} onChange={handleChange} required />
-
-        <label>Password:</label>
-        <input name="password" type="password" value={form.password} onChange={handleChange} required />
-
-        <button type="submit" disabled={loading} style={{ marginTop: 10 }}>
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
-    </main>
+    <form onSubmit={handleLogin}>
+      <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" />
+      <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" />
+      <button type="submit">Login</button>
+    </form>
   );
 }

@@ -1,7 +1,8 @@
 "use client";
+//product page
 
 import { useState, useEffect } from "react";
-import axios from "@/app/lib/axiosInstance";
+import axios from "@/lib/axiosInstance";
 import Link from "next/link";
 
 export default function ProductsPage() {
@@ -27,6 +28,7 @@ export default function ProductsPage() {
         const queryString = query.length ? "?" + query.join("&") : "";
 
         const res = await axios.get(`/products${queryString}`);
+        console.log("PRODUCTS:", res.data);
         setProducts(res.data);
       } catch (err) {
         console.error(err);
@@ -39,18 +41,31 @@ export default function ProductsPage() {
  useEffect(() => {
   async function fetchMeta() {
     try {
+      console.log("🔍 Fetching products...");
       const resProducts = await axios.get("/products");
-      const allCategories = Array.from(new Set(resProducts.data.map(p => p.category).filter(Boolean)));
-      setCategories(allCategories);
+      console.log("✅ Products loaded:", resProducts.data);
 
+      const allCategories = Array.from(
+        new Set(resProducts.data.map((p) => p.category).filter(Boolean))
+      );
+      setCategories(allCategories);
+    } catch (err) {
+      console.error("❌ Error loading products metadata:", err);
+    }
+
+    try {
+      console.log("🔍 Fetching sellers...");
       const resSellers = await axios.get("/sellers");
+      console.log("✅ Sellers loaded:", resSellers.data);
       setSellers(resSellers.data);
     } catch (err) {
-      console.error(err);
+      console.error("❌ Error loading sellers metadata:", err);
     }
   }
+
   fetchMeta();
 }, []);
+
 
 
   return (
