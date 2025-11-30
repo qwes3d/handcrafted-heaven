@@ -1,33 +1,41 @@
+// app/api/auth/register/route.js
 import { connectDB } from "@/lib/db";
 import User from "@/models/user";
 import bcrypt from "bcryptjs";
 
-export async function POST(req) {
+export async function POST(request) {
   try {
     await connectDB();
-    const { name, email, password } = await req.json();
+    const body = await request.json();
+    const { role, firstName, lastName, businessName, address, email, phone, password } = body;
 
-    if (!name || !email || !password) {
-      return Response.json({ error: "Name, email, and password are required" }, { status: 400 });
+    // basic validation
+    if (!email || !phone || !password || !role) {
+      return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400 });
     }
 
-    const exists = await User.findOne({ email });
-    if (exists)
-      return Response.json({ error: "User already exists" }, { status: 400 });
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return new Response(JSON.stringify({ error: "User already exists" }), { status: 400 });
+    }
 
     const hashed = await bcrypt.hash(password, 10);
 
-    const user = await User.create({
-      firstName: name,
+    const newUser = new User({
       email,
+      phone,
       password: hashed,
-      role: "user",
+      role,
+      ...(role === "user" ? { firstName, lastName } : {}),
+      ...(role === "seller" ? { businessName, address } : {}),
     });
 
-    const { password: _, ...userData } = user.toObject();
+    await newUser.save();
 
-    return Response.json({ message: "User registered", user: userData });
+    // Return safe user data (no password)
+    const { _id, email: uEmail, role: uRole } = newUser;
+    return new Response(JSON.stringify({ user: { id: _id, email: uEmail, role: uRole } }), { status: 201 });
   } catch (err) {
-    return Response.json({ error: err.message }, { status: 500 });
+    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
   }
 }

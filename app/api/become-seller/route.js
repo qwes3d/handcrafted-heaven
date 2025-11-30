@@ -1,14 +1,14 @@
 import { connectDB } from "@/lib/db";
 import User from "@/models/user";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@auth";
+import { auth } from "@/lib/authconfig";
 
 export async function POST(req) {
   await connectDB();
 
-  const session = await getServerSession(authOptions);
-  if (!session || !session.user)
+  const session = await auth();
+  if (!session || !session.user) {
     return Response.json({ error: "Not authenticated" }, { status: 401 });
+  }
 
   const { businessName, address, phone, image, bio } = await req.json();
 
@@ -17,8 +17,9 @@ export async function POST(req) {
   }
 
   const user = await User.findById(session.user.id);
-  if (!user)
+  if (!user) {
     return Response.json({ error: "User not found" }, { status: 404 });
+  }
 
   if (user.role === "seller") {
     return Response.json({ message: "You are already a seller!" });

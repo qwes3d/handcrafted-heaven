@@ -1,3 +1,5 @@
+//controllers/sellerproductcontroller.js
+
 import Product from "../models/products.js";
 
 // ==================== UPDATE PRODUCT ====================

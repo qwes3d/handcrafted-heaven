@@ -1,3 +1,5 @@
+//app/api/products/route.js
+
 import { productCreateSchema } from "@/validation/validators";
 import { connectDB } from "@/lib/db";
 import Product from "@/models/products";

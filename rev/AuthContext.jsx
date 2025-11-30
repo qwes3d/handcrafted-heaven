@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { createContext, useState, useEffect } from "react";
 
 export const AuthContext = createContext();
@@ -6,20 +6,17 @@ export const AuthContext = createContext();
 export default function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
-  // check localStorage on first load
   useEffect(() => {
     const saved = localStorage.getItem("user");
-    if(saved){
-      setUser(JSON.parse(saved));
-    }
+    if (saved) setUser(JSON.parse(saved));
   }, []);
 
-  function login(u){
+  function login(u) {
     setUser(u);
     localStorage.setItem("user", JSON.stringify(u));
   }
 
-  function logout(){
+  function logout() {
     setUser(null);
     localStorage.removeItem("user");
   }

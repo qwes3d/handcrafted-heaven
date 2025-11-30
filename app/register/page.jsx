@@ -1,14 +1,10 @@
 "use client";
 
-import { useState, useContext } from "react";
-import axios from "@/lib/axiosInstance";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AuthContext } from "@/rev/AuthContext";
 
 export default function RegisterPage() {
-  const { login } = useContext(AuthContext);
   const router = useRouter();
-
   const [role, setRole] = useState("user");
   const [form, setForm] = useState({
     firstName: "",
@@ -20,80 +16,116 @@ export default function RegisterPage() {
     password: "",
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  function handleChange(e) {
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+  }
 
-  const handleSubmit = async (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
+    setError("");
     setLoading(true);
 
-    // Prepare payload based on role
-    const payload = { role, email: form.email, phone: form.phone, password: form.password };
-    if (role === "user") {
-      payload.firstName = form.firstName;
-      payload.lastName = form.lastName;
-    }
-    if (role === "seller") {
-      payload.businessName = form.businessName;
-      payload.address = form.address;
-    }
-
     try {
-      const res = await axios.post("/auth/register", payload);
-      login(res.data); // store user
-      router.push("/"); // redirect
+      const payload = { role, email: form.email, phone: form.phone, password: form.password };
+      if (role === "user") {
+        payload.firstName = form.firstName;
+        payload.lastName = form.lastName;
+      } else if (role === "seller") {
+        payload.businessName = form.businessName;
+        payload.address = form.address;
+      }
+
+      const res = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (data.error) {
+        setError(data.error);
+      } else {
+        // redirect based on role
+        if (role === "seller") {
+          router.push("/seller/dashboard");
+        } else {
+          router.push("/");
+        }
+      }
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.error || "Registration failed");
+      setError("Registration failed");
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   return (
-    <main style={{ padding: 20 }}>
+    <div style={{ padding: 20 }}>
       <h1>Register</h1>
       <form onSubmit={handleSubmit} style={{ maxWidth: 500 }}>
-        <label>Role:</label>
-        <select value={role} onChange={(e) => setRole(e.target.value)}>
-          <option value="user">User</option>
-          <option value="seller">Seller</option>
-          <option value="admin">Admin</option>
-        </select>
+        <div>
+          <label>Role:</label>
+          <select value={role} onChange={e => setRole(e.target.value)}>
+            <option value="user">User</option>
+            <option value="seller">Seller</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
 
         {role === "user" && (
           <>
-            <label>First Name:</label>
-            <input name="firstName" value={form.firstName} onChange={handleChange} required />
-
-            <label>Last Name:</label>
-            <input name="lastName" value={form.lastName} onChange={handleChange} required />
+            <div>
+              <label>First name:</label>
+              <input name="firstName" value={form.firstName} onChange={handleChange} required />
+            </div>
+            <div>
+              <label>Last name:</label>
+              <input name="lastName" value={form.lastName} onChange={handleChange} required />
+            </div>
           </>
         )}
 
         {role === "seller" && (
           <>
-            <label>Business Name:</label>
-            <input name="businessName" value={form.businessName} onChange={handleChange} required />
-
-            <label>Address:</label>
-            <input name="address" value={form.address} onChange={handleChange} required />
+            <div>
+              <label>Business name:</label>
+              <input name="businessName" value={form.businessName} onChange={handleChange} required />
+            </div>
+            <div>
+              <label>Address:</label>
+              <input name="address" value={form.address} onChange={handleChange} required />
+            </div>
           </>
         )}
 
-        <label>Email:</label>
-        <input name="email" type="email" value={form.email} onChange={handleChange} required />
+        <div>
+          <label>Email:</label>
+          <input name="email" type="email" value={form.email} onChange={handleChange} required />
+        </div>
 
-        <label>Phone:</label>
-        <input name="phone" value={form.phone} onChange={handleChange} required />
+        <div>
+          <label>Phone:</label>
+          <input name="phone" value={form.phone} onChange={handleChange} required />
+        </div>
 
-        <label>Password:</label>
-        <input name="password" type="password" value={form.password} onChange={handleChange} required />
+        <div>
+          <label>Password:</label>
+          <input name="password" type="password" value={form.password} onChange={handleChange} required />
+        </div>
 
-        <button type="submit" disabled={loading} style={{ marginTop: 10 }}>
-          {loading ? "Registering..." : "Register"}
+        {error && <p style={{ color: "red" }}>{error}</p>}
+
+        <button type="submit" disabled={loading}>
+          {loading ? "Registering…" : "Register"}
         </button>
       </form>
-    </main>
+    </div>
   );
 }

@@ -2,11 +2,12 @@
 import Link from 'next/link';
 import { useContext } from 'react';
 import { CartContext } from '@/rev/CartContext';
-import { AuthContext } from '@/rev/AuthContext';
+import { AuthContext } from "@/rev/AuthContext"; // ✅ import AuthContext here
+
 
 export default function NavBar() {
   const { cart } = useContext(CartContext);
-  const { user } = useContext(AuthContext);
+   const { user, login, logout } = useContext(AuthContext);
 
   return (
     <header className="bg-gradient-to-r from-purple-600 to-pink-500 shadow-md sticky top-0 z-50">

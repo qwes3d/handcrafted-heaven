@@ -1,4 +1,4 @@
-import { getUserFromRequest } from "@/lib/auth";
+import { getUserFromRequest } from "@/lib/authconfig";
 import { sellerUpdateProduct, sellerDeleteProduct } from "@/controllers/sellerproductcontroller";
 
 export async function PUT(request, { params }) {
@@ -8,8 +8,9 @@ export async function PUT(request, { params }) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { id } = await params;           // ✅ Await params
     const data = await request.json();
-    const result = await sellerUpdateProduct(params.id, data, user);
+    const result = await sellerUpdateProduct(id, data, user);
 
     return Response.json(result);
   } catch (err) {
@@ -24,7 +25,8 @@ export async function DELETE(request, { params }) {
       return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const result = await sellerDeleteProduct(params.id, user);
+    const { id } = await params;           // ✅ Await params
+    const result = await sellerDeleteProduct(id, user);
 
     return Response.json(result);
   } catch (err) {

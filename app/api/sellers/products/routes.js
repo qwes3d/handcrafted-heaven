@@ -1,3 +1,5 @@
+//app/api/sellers/products/routes.js
+
 import { getUserFromRequest, requireRole } from "@/lib/auth";
 import { sellerCreateProduct, sellerGetProducts } from "@/controllers/sellerproductcontroller";
 

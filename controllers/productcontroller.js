@@ -1,3 +1,5 @@
+// controllers/productcontroller.js
+
 import Product from "../models/products.js";
 
 // CREATE PRODUCT
