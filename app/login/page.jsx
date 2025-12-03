@@ -1,17 +1,32 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { useSession, signIn } from "next-auth/react";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const router = useRouter();
   const { data: session, status } = useSession();
 
-  async function handleLogin(e) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (status === "authenticated") {
+      const role = session.user.role;
+      if (role === "admin") router.push("/admin/dashboard");
+      else if (role === "seller") router.push("/sellers/dashboard");
+      else router.push("/");
+    }
+  }, [status, session, router]);
+
+  async function handleSubmit(e) {
     e.preventDefault();
+    setError("");
+    setLoading(true);
 
     const result = await signIn("credentials", {
       redirect: false,
@@ -20,44 +35,48 @@ export default function LoginPage() {
     });
 
     if (result?.error) {
-      alert("Invalid credentials");
-      return;
+      setError("Invalid credentials");
     }
-    // result.ok === true means sign‑in succeeded but session may update asynchronously
+
+    setLoading(false);
+    // Redirection handled by useEffect
   }
 
-  // Watch session change: when user signs in, session becomes available → redirect based on role
-  useEffect(() => {
-    if (status === "authenticated" && session?.user) {
-      const role = session.user.role;
-      if (role === "admin") {
-        router.push("/admin/dashboard");
-      } else if (role === "seller") {
-        router.push("/seller/dashboard");
-      } else {
-        router.push("/");
-      }
-    }
-  }, [status, session, router]);
+  if (status === "loading") return <p>Loading...</p>;
 
   return (
-    <form onSubmit={handleLogin} className="auth-form">
-      <h2>Login</h2>
-      <input
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        placeholder="Email"
-        type="email"
-        required
-      />
-      <input
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        type="password"
-        placeholder="Password"
-        required
-      />
-      <button type="submit">Login</button>
-    </form>
+    <div style={{ padding: 20, maxWidth: 400, margin: "auto" }}>
+      <h1 className="text-2xl font-bold mb-4">Login</h1>
+
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="border px-3 py-2 rounded"
+          required
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="border px-3 py-2 rounded"
+          required
+        />
+
+        {error && <p className="text-red-600">{error}</p>}
+
+        <button
+          type="submit"
+          className="bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition"
+          disabled={loading}
+        >
+          {loading ? "Logging in…" : "Login"}
+        </button>
+      </form>
+    </div>
   );
 }

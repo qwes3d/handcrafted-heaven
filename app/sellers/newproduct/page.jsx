@@ -1,53 +1,135 @@
 "use client";
-import { useState, useContext } from "react";
-import axios from "@/lib/axiosInstance";
+
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { AuthContext } from "@/rev/AuthContext";
+import { useSession } from "next-auth/react";
+import axios from "@/lib/axiosInstance";
 
 export default function NewProduct() {
   const router = useRouter();
-  const { user } = useContext(AuthContext);
+  const { data: session } = useSession();
+  const user = session?.user;
 
-  const [data, setData] = useState({
+  const [form, setForm] = useState({
     title: "",
     description: "",
     category: "",
     price: "",
-    images: ""
+    image: "",
+    file: null,
   });
+  const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e) {
+  if (!user) return <p className="text-center mt-20">Please log in</p>;
+  if (user.role !== "seller") return <p className="text-center mt-20">Unauthorized</p>;
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setForm((prev) => ({ ...prev, file }));
+
+    const reader = new FileReader();
+    reader.onload = () => setForm((prev) => ({ ...prev, image: reader.result }));
+    reader.readAsDataURL(file);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
     try {
-      const body = { ...data, images: [data.images] };
-      await axios.post("/seller/add-product", body);
+      const data = new FormData();
+      data.append("title", form.title);
+      data.append("description", form.description);
+      data.append("category", form.category);
+      data.append("price", form.price);
+      if (form.file) data.append("image", form.file);
+
+      await axios.post("/seller/add-product", data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
       alert("Product added successfully");
-      router.push("/seller/dashboard");
+      router.push("/sellers/dashboard");
     } catch (err) {
       console.error(err);
       alert("Failed to add product");
+    } finally {
+      setLoading(false);
     }
-  }
-
-  if (!user || user.role !== "seller") return <p>Unauthorized</p>;
+  };
 
   return (
-    <main style={{ padding: "2rem" }}>
-      <h1>Add New Handcrafted Product</h1>
-      <form onSubmit={handleSubmit} style={{ display:"grid", gap:"1rem", maxWidth:"400px" }}>
-        <input required placeholder="Title"
-          value={data.title} onChange={e=>setData({...data,title:e.target.value})}/>
-        <textarea required placeholder="Description"
-          value={data.description} onChange={e=>setData({...data,description:e.target.value})}/>
-        <input placeholder="Category"
-          value={data.category} onChange={e=>setData({...data,category:e.target.value})}/>
-        <input required placeholder="Price (number)" type="number"
-          value={data.price} onChange={e=>setData({...data,price:e.target.value})}/>
-        <input required placeholder="Image URL"
-          value={data.images} onChange={e=>setData({...data,images:e.target.value})}/>
+    <main className="p-6 max-w-xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Add New Product</h1>
 
-        <button type="submit" style={{background:"black",color:"white",padding:"10px",borderRadius:"8px"}}>
-          Save Product
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-6 rounded-xl shadow-lg grid gap-4"
+      >
+        <input
+          name="title"
+          value={form.title}
+          onChange={handleChange}
+          placeholder="Product Title"
+          required
+          className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+
+        <textarea
+          name="description"
+          value={form.description}
+          onChange={handleChange}
+          placeholder="Product Description"
+          required
+          className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+          rows={4}
+        />
+
+        <input
+          name="category"
+          value={form.category}
+          onChange={handleChange}
+          placeholder="Category (optional)"
+          className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+
+        <input
+          name="price"
+          type="number"
+          value={form.price}
+          onChange={handleChange}
+          placeholder="Price (GH₵)"
+          required
+          className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+
+        {form.image && (
+          <img
+            src={form.image}
+            alt="Preview"
+            className="h-48 w-full object-cover rounded-lg mt-2 border"
+          />
+        )}
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
+        >
+          {loading ? "Saving…" : "Add Product"}
         </button>
       </form>
     </main>

@@ -1,35 +1,35 @@
-import Order from "../models/order.js";
-import Product from "../models/products.js";
+import Order from "@/models/order";
+import dbConnect from "@/lib/dbConnect";
 
-// CREATE ORDER
 export async function createOrder(data, user) {
-  const { items, address, paymentMethod } = data;
+  await dbConnect();
 
-  if (!items || items.length === 0) throw new Error("No items in order");
-
-  // Optional: validate product existence and calculate total
-  let total = 0;
-  for (const item of items) {
-    const product = await Product.findById(item.productId);
-    if (!product) throw new Error(`Product not found: ${item.productId}`);
-    total += product.price * item.quantity;
-  }
+  // Map cart items to correct structure
+  const items = data.items.map((item) => ({
+    productId: item._id || item.productId, // fallback if _id present
+    title: item.title,
+    price: item.price,
+    quantity: item.quantity || 1,
+    image: item.image || item.images?.[0],
+    sellerId: item.sellerId,
+  }));
 
   const order = await Order.create({
     userId: user.id,
     items,
-    address,
-    paymentMethod,
-    total,
-    status: "pending",
+    total: data.total,
+    shipping: data.shipping,
+    paymentStatus: "pending",
   });
 
-  return { message: "Order created", order };
+  return order;
 }
 
-// GET ORDERS FOR LOGGED-IN USER
 export async function getOrders(userId) {
-  const orders = await Order.find({ userId }).populate("items.productId ");
+  await dbConnect();
+
+  // Fetch orders for a specific user
+  const orders = await Order.find({ userId }).sort({ createdAt: -1 });
+
   return orders;
 }
-

@@ -1,57 +1,71 @@
 'use client';
-//seller page showing seller info and their products
+//'
 
+import { useState, useEffect } from 'react';
 import axios from '@/lib/axiosInstance';
-import { useEffect, useState, useContext } from 'react';
-import SellerProduct from '@/ui/SellerProduct';
-import { CartContext } from '@/rev/CartContext';
+import ProductCard from '@/ui/ProductCard';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
 
-
-export default function SellerPage() {
-  const { id } = useParams();
-  const [seller, setSeller] = useState<Seller | null>(null);
-  const [products, setProducts] = useState<[]>([]);
-  const { addToCart, cart } = useContext(CartContext);
+export default function SellerPage({ params }) {
+  const { id } = params; // sellerId from URL
+  const [seller, setSeller] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function load() {
+    async function fetchSellerData() {
       try {
-        const resSeller = await axios.get(`/sellers/${id}`);
-        setSeller(resSeller.data);
+        // Fetch seller info
+        const sellerRes = await axios.get(`/sellers/${id}`);
+        setSeller(sellerRes.data);
 
-        const resProducts = await axios.get(`/products?sellerId=${id}`);
-        setProducts(resProducts.data);
+        // Fetch products by this seller
+        const productsRes = await axios.get(`/products?sellerId=${id}`);
+        setProducts(productsRes.data);
       } catch (err) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     }
-    if (id) load();
+
+    fetchSellerData();
   }, [id]);
 
-  if (!seller) return <p>Loading seller...</p>;
+  if (loading) return <p className="text-center mt-10">Loading seller...</p>;
+  if (!seller) return <p className="text-center mt-10">Seller not found.</p>;
 
   return (
-    <section>
-      <img src={seller.image || '/images/placeholder.jpg'} alt={seller.name} />
-
-      <h2>{seller.name || seller.businessName}</h2>
-      <p>{seller.bio || seller.address}</p>
-      <p>Contact: {seller.contactEmail || seller.phone}</p>
-
-      <p>Some of the products by {seller.name}</p>
-      <div className="product-grid">
-        {products.map((p, index) => (
-          <SellerProduct
-            key={index} // use index if no unique id
-            product={p}
-            addToCart={addToCart}
-            inCart={!!cart.find(i => i.sellerId === p.sellerId && i.title === p.title)} // optional: check uniqueness by sellerId + title
-          />
-        ))}
+    <section className="max-w-7xl mx-auto px-4 py-10">
+      {/* Seller Info */}
+      <div className="mb-10 text-center">
+        <h1 className="text-3xl font-bold text-gray-900">{seller.name}</h1>
+        {seller.bio && <p className="text-gray-700 mt-2">{seller.bio}</p>}
+        {seller.website && (
+          <a
+            href={seller.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-indigo-600 hover:underline mt-2 block"
+          >
+            Visit Website
+          </a>
+        )}
       </div>
 
+      {/* Seller Products */}
+      <h2 className="text-2xl font-bold mb-6">Products by {seller.name}</h2>
+      {products.length === 0 ? (
+        <p className="text-gray-600">No products available from this seller.</p>
+      ) : (
+        <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          {products.map((p) => (
+            <ProductCard key={p._id} product={p} addToCart={() => {}} inCart={false} />
+          ))}
+        </div>
+        
+      )}
+      
       <Link href="/products" className="btn">Back to Products</Link>
     </section>
   );

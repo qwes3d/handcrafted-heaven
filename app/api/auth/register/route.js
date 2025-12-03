@@ -1,41 +1,59 @@
-// app/api/auth/register/route.js
-import { connectDB } from "@/lib/db";
-import User from "@/models/user";
+// /app/api/auth/register/route.js
+import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import dbConnect from "@/lib/mongodb";
+import User from "@/models/user";
 
-export async function POST(request) {
+export async function POST(req) {
   try {
-    await connectDB();
-    const body = await request.json();
-    const { role, firstName, lastName, businessName, address, email, phone, password } = body;
+    await dbConnect();
 
-    // basic validation
-    if (!email || !phone || !password || !role) {
-      return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400 });
+    const { firstName, lastName, businessName, address, email, phone, password, role } = await req.json();
+
+    // Basic validation
+    if (!email || !password || !role || (role === "user" && (!firstName || !lastName)) || (role === "seller" && (!businessName || !address))) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const existing = await User.findOne({ email });
-    if (existing) {
-      return new Response(JSON.stringify({ error: "User already exists" }), { status: 400 });
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return NextResponse.json({ error: "Email already registered" }, { status: 409 });
     }
 
-    const hashed = await bcrypt.hash(password, 10);
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = new User({
+    // Create user
+    const newUser = await User.create({
+      firstName,
+      lastName,
+      businessName: role === "seller" ? businessName : undefined,
+      address: role === "seller" ? address : undefined,
       email,
       phone,
-      password: hashed,
+      password: hashedPassword,
       role,
-      ...(role === "user" ? { firstName, lastName } : {}),
-      ...(role === "seller" ? { businessName, address } : {}),
+      isSeller: role === "seller",
     });
 
-    await newUser.save();
-
-    // Return safe user data (no password)
-    const { _id, email: uEmail, role: uRole } = newUser;
-    return new Response(JSON.stringify({ user: { id: _id, email: uEmail, role: uRole } }), { status: 201 });
+    return NextResponse.json(
+      {
+        message: "Registration successful",
+        user: {
+          id: newUser._id,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
+          businessName: newUser.businessName,
+          email: newUser.email,
+          role: newUser.role,
+          isSeller: newUser.isSeller,
+        },
+      },
+      { status: 201 }
+    );
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+    console.error("REGISTER ERROR:", err);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

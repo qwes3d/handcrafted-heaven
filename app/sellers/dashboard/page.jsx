@@ -1,29 +1,31 @@
 "use client";
 
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState } from "react";
 import axios from "@/lib/axiosInstance";
-import { AuthContext } from "@/rev/AuthContext";
+import { useSession } from "next-auth/react";
 
 export default function SellerDashboard() {
-  const { user } = useContext(AuthContext);
+  const { data: session } = useSession();
+  const user = session?.user;
+
   const [products, setProducts] = useState([]);
   const [editingId, setEditingId] = useState(null);
-  const [savingId, setSavingId] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [formState, setFormState] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [savingId, setSavingId] = useState(null);
 
   useEffect(() => {
-    if (!user) return;
-    loadSellerProducts();
+    if (!user || user.role !== "seller") return;
+    loadProducts();
   }, [user]);
 
-  async function loadSellerProducts() {
+  async function loadProducts() {
     try {
       setLoading(true);
-      const res = await axios.get(`/seller/my-products`); // backend returns ONLY seller’s own products
-      setProducts(res.data || []);
+      const res = await axios.get("/products");
+      setProducts(res.data.filter((p) => p.sellerId === user.id));
     } catch (err) {
-      console.error("Failed loading seller products", err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -37,6 +39,7 @@ export default function SellerDashboard() {
       category: p.category,
       price: p.price,
       image: p.images?.[0] || "",
+      file: null,
     });
   }
 
@@ -48,24 +51,31 @@ export default function SellerDashboard() {
   async function saveEdit(id) {
     try {
       setSavingId(id);
-      await axios.put(`/seller/update/${id}`, {
-        ...formState,
-        images: [formState.image],
+      const data = new FormData();
+      data.append("title", formState.title);
+      data.append("description", formState.description);
+      data.append("category", formState.category);
+      data.append("price", formState.price);
+      if (formState.file) data.append("image", formState.file);
+
+      await axios.put(`/sellers/update/${id}`, data, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
-      await loadSellerProducts();
+
+      await loadProducts();
       cancelEdit();
     } catch (err) {
-      console.error("Save failed", err);
-      alert("Failed saving product");
+      console.error(err);
+      alert("Failed to save product");
     } finally {
       setSavingId(null);
     }
   }
 
   async function deleteProduct(id) {
-    if (!confirm("Delete permanently?")) return;
+    if (!confirm("Delete this product?")) return;
     try {
-      await axios.delete(`/seller/delete/${id}`);
+      await axios.delete(`/sellers/delete/${id}`);
       setProducts((prev) => prev.filter((p) => p._id !== id));
     } catch (err) {
       alert("Delete failed");
@@ -76,145 +86,137 @@ export default function SellerDashboard() {
   if (user.role !== "seller") return <p>Access Denied</p>;
 
   return (
-    <main style={{ padding: 20 }}>
-      <h1>Seller Dashboard</h1>
-
-      <a href="/seller/new-product" className="btn">+ Add New Product</a>
+    <main className="p-6 max-w-7xl mx-auto">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Seller Dashboard</h1>
+        <a
+          href="/sellers/newproduct"
+          className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition"
+        >
+          + Add Product
+        </a>
+      </div>
 
       {loading ? (
-        <p>Loading...</p>
+        <p>Loading products...</p>
       ) : products.length === 0 ? (
         <p>No products yet.</p>
       ) : (
-        <table className="seller-table">
-          <thead>
-            <tr>
-              <th>Image</th>
-              <th>Title</th>
-              <th>Description</th>
-              <th>Category</th>
-              <th>Price</th>
-              <th></th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {products.map((p) => {
-              const editing = p._id === editingId;
-              return (
-                <tr key={p._id}>
-                  <td>
-                    {editing ? (
-                      <input
-                        value={formState.image}
-                        onChange={(e) =>
-                          setFormState((s) => ({
-                            ...s,
-                            image: e.target.value,
-                          }))
-                        }
-                      />
-                    ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {products.map((p) => {
+            const editing = editingId === p._id;
+            return (
+              <div
+                key={p._id}
+                className="border rounded-lg overflow-hidden shadow hover:shadow-lg transition relative p-2 flex flex-col"
+              >
+                {editing ? (
+                  <>
+                    <input
+                      type="text"
+                      value={formState.title}
+                      onChange={(e) =>
+                        setFormState((s) => ({ ...s, title: e.target.value }))
+                      }
+                      placeholder="Title"
+                      className="border px-2 py-1 rounded mb-1"
+                    />
+                    <textarea
+                      value={formState.description}
+                      onChange={(e) =>
+                        setFormState((s) => ({
+                          ...s,
+                          description: e.target.value,
+                        }))
+                      }
+                      placeholder="Description"
+                      className="border px-2 py-1 rounded mb-1"
+                    />
+                    <input
+                      type="text"
+                      value={formState.category}
+                      onChange={(e) =>
+                        setFormState((s) => ({ ...s, category: e.target.value }))
+                      }
+                      placeholder="Category"
+                      className="border px-2 py-1 rounded mb-1"
+                    />
+                    <input
+                      type="number"
+                      value={formState.price}
+                      onChange={(e) =>
+                        setFormState((s) => ({ ...s, price: e.target.value }))
+                      }
+                      placeholder="Price"
+                      className="border px-2 py-1 rounded mb-1"
+                    />
+                    {formState.image && (
                       <img
-                        src={p.images?.[0]}
-                        style={{ width: 120, height: 80, objectFit: "cover" }}
+                        src={formState.image}
+                        alt="Preview"
+                        className="h-32 w-full object-cover mb-1 rounded"
                       />
                     )}
-                  </td>
-
-                  <td>
-                    {editing ? (
-                      <input
-                        value={formState.title}
-                        onChange={(e) =>
-                          setFormState((s) => ({
-                            ...s,
-                            title: e.target.value,
-                          }))
-                        }
-                      />
-                    ) : (
-                      p.title
-                    )}
-                  </td>
-
-                  <td>
-                    {editing ? (
-                      <textarea
-                        value={formState.description}
-                        onChange={(e) =>
-                          setFormState((s) => ({
-                            ...s,
-                            description: e.target.value,
-                          }))
-                        }
-                      />
-                    ) : (
-                      p.description
-                    )}
-                  </td>
-
-                  <td>
-                    {editing ? (
-                      <input
-                        value={formState.category}
-                        onChange={(e) =>
-                          setFormState((s) => ({
-                            ...s,
-                            category: e.target.value,
-                          }))
-                        }
-                      />
-                    ) : (
-                      p.category
-                    )}
-                  </td>
-
-                  <td>
-                    {editing ? (
-                      <input
-                        type="number"
-                        value={formState.price}
-                        onChange={(e) =>
-                          setFormState((s) => ({
-                            ...s,
-                            price: e.target.value,
-                          }))
-                        }
-                      />
-                    ) : (
-                      `GH₵ ${p.price}`
-                    )}
-                  </td>
-
-                  <td>
-                    {!editing ? (
-                      <>
-                        <button onClick={() => beginEdit(p)}>Edit</button>
-                        <button
-                          onClick={() => deleteProduct(p._id)}
-                          className="btn-danger"
-                        >
-                          Delete
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => saveEdit(p._id)}
-                          disabled={savingId === p._id}
-                        >
-                          {savingId === p._id ? "Saving..." : "Save"}
-                        </button>
-                        <button onClick={cancelEdit}>Cancel</button>
-                      </>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        setFormState((s) => ({ ...s, file }));
+                        const reader = new FileReader();
+                        reader.onload = () =>
+                          setFormState((s) => ({ ...s, image: reader.result }));
+                        reader.readAsDataURL(file);
+                      }}
+                      className="mb-1"
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => saveEdit(p._id)}
+                        disabled={savingId === p._id}
+                        className="flex-1 bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 transition disabled:opacity-50"
+                      >
+                        {savingId === p._id ? "Saving..." : "Save"}
+                      </button>
+                      <button
+                        onClick={cancelEdit}
+                        className="flex-1 bg-gray-300 px-2 py-1 rounded hover:bg-gray-400 transition"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <img
+                      src={p.images?.[0]}
+                      alt={p.title}
+                      className="h-48 w-full object-cover mb-2 rounded"
+                    />
+                    <h2 className="font-semibold text-lg">{p.title}</h2>
+                    <p className="text-gray-500 text-sm">{p.category}</p>
+                    <p className="mt-1 font-medium">GH₵ {p.price}</p>
+                    <div className="flex justify-between mt-2">
+                      <button
+                        onClick={() => beginEdit(p)}
+                        className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition flex-1 mr-1"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deleteProduct(p._id)}
+                        className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition flex-1 ml-1"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            );
+          })}
+        </div>
       )}
     </main>
   );

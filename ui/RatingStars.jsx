@@ -1,17 +1,37 @@
+"use client";
+// ui/RatingStars.jsx
+import { useEffect, useState } from "react";
 
-// File: components/RatingStars.jsx
-'use client';
-import { useEffect, useState } from 'react';
-export default function RatingStars({ productId }){
+export default function RatingStars({ productId, size = "md" }) {
   const [rating, setRating] = useState(0);
-  useEffect(()=>{
-    try{ const r = localStorage.getItem(`rating:${productId}`); if(r) setRating(Number(r)); }catch(e){}
-  },[productId]);
-  function save(r){ setRating(r); localStorage.setItem(`rating:${productId}`, String(r)); }
+
+  useEffect(() => {
+    const saved = localStorage.getItem(`rating:${productId}`);
+    if (saved) setRating(Number(saved));
+  }, [productId]);
+
+  const sizeClasses = {
+    sm: "text-lg",
+    md: "text-2xl",
+    lg: "text-3xl",
+  };
+
+  function save(r) {
+    setRating(r);
+    localStorage.setItem(`rating:${productId}`, String(r));
+  }
+
   return (
-    <div className="rating-stars">
-      {[1,2,3,4,5].map(n=> (
-        <button key={n} onClick={()=>save(n)} aria-label={`${n} stars`}>{n <= rating ? '★' : '☆'}</button>
+    <div className="flex gap-1">
+      {[1, 2, 3, 4, 5].map((n) => (
+        <button
+          key={n}
+          onClick={() => save(n)}
+          aria-label={`${n} stars`}
+          className={`${sizeClasses[size]} transition text-yellow-500 hover:scale-110`}
+        >
+          {n <= rating ? "★" : "☆"}
+        </button>
       ))}
     </div>
   );
