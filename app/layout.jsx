@@ -3,7 +3,7 @@
 
 import { SessionProvider } from "next-auth/react";
 import AuthProvider from "@/rev/AuthContext";
-import CartProvider from "@/rev/CartContext";
+import {CartProvider} from "@/rev/CartContext";
 import NavBar from "@/ui/NavBar";
 import './globals.css';
 

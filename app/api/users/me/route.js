@@ -9,7 +9,7 @@ import formidable from "formidable";
 
 export const runtime = "nodejs";       // Required for fs operations
 export const dynamic = "force-dynamic"; // Required for file uploads
-export const config = { api: { bodyParser: false } };
+
 
 await connectDB();
 

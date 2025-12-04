@@ -1,9 +1,8 @@
-// ui/ProductCard.jsx
 "use client";
 
 import Link from "next/link";
 
-export default function ProductCard({ product, addToCart, inCart }) {
+export default function ProductCard({ product, addToCart, removeFromCart, inCart }) {
   return (
     <article className="
       rounded-xl overflow-hidden bg-white shadow-md hover:shadow-xl 
@@ -72,28 +71,16 @@ export default function ProductCard({ product, addToCart, inCart }) {
             </span>
           )}
 
-          {/* Add to Cart */}
-          {inCart ? (
-            <button
-              disabled
-              className="
-                w-full py-2 rounded-lg bg-gray-400 text-white text-sm 
-                cursor-not-allowed
-              "
-            >
-              In Cart
-            </button>
-          ) : (
-            <button
-              onClick={() => addToCart(product)}
-              className="
-                w-full py-2 rounded-lg bg-green-600 text-white text-sm font-medium
-                hover:bg-green-700 transition duration-300
-              "
-            >
-              Add to Cart
-            </button>
-          )}
+          {/* Add/Remove Cart Button */}
+          <button
+            onClick={() => inCart ? removeFromCart(product._id) : addToCart(product)}
+            className={`
+              w-full py-2 rounded-lg text-white text-sm font-medium transition duration-300
+              ${inCart ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"}
+            `}
+          >
+            {inCart ? "Remove from Cart" : "Add to Cart"}
+          </button>
 
         </div>
       </div>

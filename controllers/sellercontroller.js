@@ -1,4 +1,5 @@
 import Seller from "../models/seller.js";
+//@/controllers/sellercontroller.js
 
 // ==================== GET SELLER BY ID (public) ====================
 export const getSeller = async (id) => {

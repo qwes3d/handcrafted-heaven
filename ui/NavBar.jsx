@@ -1,8 +1,10 @@
 "use client";
+
 import Link from "next/link";
 import { useState, useEffect, useContext } from "react";
 import { useSession } from "next-auth/react";
 import { FiShoppingCart, FiMenu, FiX, FiUser } from "react-icons/fi";
+import { useRouter } from "next/navigation";
 import axios from "@/lib/axiosInstance";
 import LogoutButton from "@/ui/LogoutButton";
 import { CartContext } from "@/rev/CartContext";
@@ -11,14 +13,17 @@ export default function NavBar() {
   const { data: session } = useSession();
   const user = session?.user;
 
-  const { cart } = useContext(CartContext);
-  const cartCount = cart.length;
+  const { cartItems } = useContext(CartContext);
+  const cartCount = cartItems.length;
 
   const [open, setOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Fetch unique categories
+  const router = useRouter();
+
+  // Fetch categories
   useEffect(() => {
     async function fetchCategories() {
       try {
@@ -34,90 +39,57 @@ export default function NavBar() {
     fetchCategories();
   }, []);
 
-  // ---------- Helper Components ----------
-  // ---------- Helper Components ----------
-const UserLinks = () => {
-  if (!user) return null; // safety check
+  // Handle search
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    router.push(`/products?search=${encodeURIComponent(searchQuery)}`);
+  };
 
-  const isUser = user.role === "user";
-  const isSeller = user.role === "seller";
-  const isAdmin = user.role === "admin";
-
-  return (
-    <>
-      {/* Become Seller - Only visible to NORMAL users */}
-      {isUser && (
-        <Link
-          href="/become-seller"
-          className="text-blue-600 font-medium hover:text-blue-800"
-        >
-          Become a Seller
+  const UserLinks = () => {
+    if (!user) return null;
+    return (
+      <>
+        {user.role === "user" && (
+          <Link href="/become-seller" className="text-blue-600 hover:text-blue-800">
+            Become a Seller
+          </Link>
+        )}
+        <Link href="/profile" className="flex items-center gap-1 hover:text-indigo-600">
+          <FiUser /> {user.firstName || user.email || "Profile"}
         </Link>
-      )}
-
-      {/* Profile - Visible to ALL */}
-      <Link
-        href="/profile"
-        className="flex items-center gap-1 hover:text-indigo-600"
-      >
-        <FiUser className="text-xl" />
-        {user?.firstName || user?.email || "Profile"}
-      </Link>
-
-      {/* Seller Dashboard - Only for sellers */}
-      {isSeller && (
-        <Link
-          href="/sellers/dashboard"
-          className="hover:text-indigo-600 font-medium"
-        >
-          Seller Dashboard
-        </Link>
-      )}
-
-      {/* Admin Dashboard - Only for admin */}
-      {isAdmin && (
-        <Link
-          href="/admin/dashboard"
-          className="hover:text-indigo-600 font-medium"
-        >
-          Admin Dashboard
-        </Link>
-      )}
-
-      <LogoutButton />
-    </>
-  );
-};
-
+        {user.role === "seller" && (
+          <Link href="/sellers/dashboard" className="hover:text-indigo-600 font-medium">
+            Seller Dashboard
+          </Link>
+        )}
+        {user.role === "admin" && (
+          <Link href="/admin/dashboard" className="hover:text-indigo-600 font-medium">
+            Admin Dashboard
+          </Link>
+        )}
+        <LogoutButton />
+      </>
+    );
+  };
 
   const GuestLinks = () => (
     <>
-      <Link href="/login" className="hover:text-indigo-600 font-medium">
-        Sign In
-      </Link>
-      <Link href="/register" className="hover:text-indigo-600 font-medium">
-        Register
-      </Link>
+      <Link href="/login" className="hover:text-indigo-600 font-medium">Sign In</Link>
+      <Link href="/register" className="hover:text-indigo-600 font-medium">Register</Link>
     </>
   );
 
   return (
     <header className="bg-white shadow sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-        {/* Left: Logo + Desktop Categories */}
+        {/* Logo + Categories */}
         <div className="flex items-center gap-4">
-          <button
-            onClick={() => setOpen(!open)}
-            className="md:hidden text-2xl text-gray-700"
-          >
+          <button onClick={() => setOpen(!open)} className="md:hidden text-2xl text-gray-700">
             {open ? <FiX /> : <FiMenu />}
           </button>
+          <Link href="/" className="text-2xl font-bold text-gray-900">Handcrafted Haven</Link>
 
-          <Link href="/" className="text-2xl font-bold text-gray-900">
-            Handcrafted Haven
-          </Link>
-
-          {/* Desktop Categories dropdown */}
           <div className="hidden md:block relative">
             <button
               onClick={() => setCategoriesOpen(!categoriesOpen)}
@@ -143,21 +115,25 @@ const UserLinks = () => {
         </div>
 
         {/* Search */}
-        <div className="hidden md:flex flex-1 mx-6">
+        <form onSubmit={handleSearch} className="hidden md:flex flex-1 mx-6">
           <input
             type="search"
             placeholder="Search handmade products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full border rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
-          <button className="bg-indigo-600 text-white px-4 rounded-r-lg hover:bg-indigo-700 transition">
+          <button
+            type="submit"
+            className="bg-indigo-600 text-white px-4 rounded-r-lg hover:bg-indigo-700 transition"
+          >
             Search
           </button>
-        </div>
+        </form>
 
-        {/* Right: User + Cart */}
+        {/* User & Cart */}
         <div className="flex items-center gap-6 text-gray-700">
           {user ? <UserLinks /> : <GuestLinks />}
-
           <Link href="/cart" className="relative">
             <FiShoppingCart className="text-2xl hover:text-indigo-600 transition" />
             {cartCount > 0 && (
@@ -171,38 +147,16 @@ const UserLinks = () => {
 
       {/* Mobile Search */}
       <div className="md:hidden px-4 pb-3">
-        <input
-          type="search"
-          placeholder="Search products..."
-          className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500"
-        />
+        <form onSubmit={handleSearch}>
+          <input
+            type="search"
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500"
+          />
+        </form>
       </div>
-
-      {/* Mobile Menu */}
-      {open && (
-        <div className="md:hidden bg-gray-50 border-t px-6 py-4 space-y-3">
-          <h4 className="font-semibold mb-2">Categories</h4>
-          <div className="grid gap-2">
-            {categories.map((c) => (
-              <Link
-                key={c}
-                href={`/category/${c.toLowerCase()}`}
-                className="block py-1 text-gray-700 hover:text-indigo-600"
-              >
-                {c}
-              </Link>
-            ))}
-          </div>
-
-          <hr className="border-gray-300" />
-
-          {user ? <UserLinks /> : <GuestLinks />}
-
-          <Link href="/cart" className="block py-1 hover:text-indigo-600">
-            Cart ({cartCount})
-          </Link>
-        </div>
-      )}
     </header>
   );
 }
