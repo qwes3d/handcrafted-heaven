@@ -103,25 +103,28 @@ export default function NavBar() {
         {/* User Links + Search + Cart */}
         <div className="flex items-center gap-4">
           {/* Search */}
-          <form onSubmit={handleSearch} className="hidden md:flex">
+          <form onSubmit={handleSearch} className="flex-1 md:flex md:items-center md:mr-4">
             <label htmlFor="search-products" className="sr-only">Search products</label>
-            <input
-              id="search-products"
-              type="search"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="border rounded-l-lg px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              aria-label="Search products"
-            />
-            <button
-              type="submit"
-              className="bg-indigo-600 text-white px-4 py-2 rounded-r-lg hover:bg-indigo-700 transition focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold"
-              aria-label="Submit search"
-            >
-              Search
-            </button>
+            <div className="flex w-full max-w-md">
+              <input
+                     id="search-products"
+                     type="search"
+                     placeholder="Search products..."
+                     value={searchQuery}
+                     onChange={(e) => setSearchQuery(e.target.value)}
+                     className="w-full border border-gray-300 rounded-l-lg px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                     aria-label="Search products"
+                     />
+                     <button
+                     type="submit"
+                     className="bg-indigo-600 text-white px-4 py-2 rounded-r-lg hover:bg-indigo-700 transition focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold"
+                     aria-label="Submit search"
+                     >
+                      Search
+                     </button>
+            </div>
           </form>
+
 
           {/* User Links */}
           {user ? (
