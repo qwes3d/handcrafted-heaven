@@ -109,7 +109,7 @@ export default function CheckoutPage() {
           <select
             value={paymentMethod}
             onChange={(e) => setPaymentMethod(e.target.value)}
-            className="border rounded px-3 py-2"
+            className="border rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             <option value="card">Card (Stripe)</option>
             <option value="mobile">Mobile Money</option>

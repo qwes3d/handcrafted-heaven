@@ -35,6 +35,7 @@ export default function SellerDashboard() {
     setEditingId(p._id);
     setFormState({
       title: p.title,
+      sellerId: p.sellerId,
       description: p.description,
       category: p.category,
       price: p.price,
@@ -53,6 +54,7 @@ export default function SellerDashboard() {
       setSavingId(id);
       const data = new FormData();
       data.append("title", formState.title);
+      data.append("sellerId", formState.sellerId);
       data.append("description", formState.description);
       data.append("category", formState.category);
       data.append("price", formState.price);
@@ -119,7 +121,19 @@ export default function SellerDashboard() {
                         setFormState((s) => ({ ...s, title: e.target.value }))
                       }
                       placeholder="Title"
-                      className="border px-2 py-1 rounded mb-1"
+                      className="w-full border px-2 py-1 rounded mb-1 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <input
+                      type="text"
+                      value={formState.sellerId}
+                      onChange={(e) =>
+                        setFormState((s) => ({
+                          ...s,
+                          sellerId: e.target.value,
+                        }))
+                      }
+                      placeholder="Seller ID"
+                      className="w-full border px-2 py-1 rounded mb-1 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                     <textarea
                       value={formState.description}
@@ -130,7 +144,7 @@ export default function SellerDashboard() {
                         }))
                       }
                       placeholder="Description"
-                      className="border px-2 py-1 rounded mb-1"
+                      className="w-full border px-2 py-1 rounded mb-1 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                     <input
                       type="text"
@@ -139,7 +153,7 @@ export default function SellerDashboard() {
                         setFormState((s) => ({ ...s, category: e.target.value }))
                       }
                       placeholder="Category"
-                      className="border px-2 py-1 rounded mb-1"
+                      className="w-full border px-2 py-1 rounded mb-1 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                     <input
                       type="number"
@@ -148,7 +162,7 @@ export default function SellerDashboard() {
                         setFormState((s) => ({ ...s, price: e.target.value }))
                       }
                       placeholder="Price"
-                      className="border px-2 py-1 rounded mb-1"
+                      className="w-full border px-2 py-1 rounded mb-1 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                     {formState.image && (
                       <img
@@ -169,7 +183,7 @@ export default function SellerDashboard() {
                           setFormState((s) => ({ ...s, image: reader.result }));
                         reader.readAsDataURL(file);
                       }}
-                      className="mb-1"
+                      className="w-full mb-1 text-base font-semibold text-gray-900 placeholder-gray-500"
                     />
                     <div className="flex gap-2">
                       <button

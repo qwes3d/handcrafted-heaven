@@ -10,6 +10,7 @@ export default function SellerPage() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
+     console.log("SellerPage ID:", id);
     if (!id) return;
 
     async function loadSeller() {
@@ -46,7 +47,7 @@ export default function SellerPage() {
 
           {/* Profile Image */}
           <img
-            src={seller.profilePic || "/images/default-user.jpg"}
+            src={seller.profilePic || "/images/default-user.WEBP"}
             className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-md"
           />
 

@@ -1,5 +1,5 @@
 // src/pages/api/users/me/avatar.js
-import dbConnect from "@/lib/db";
+import connectDB from "@/lib/db";
 import User from "@/models/user";
 import multer from "multer";
 import nextConnect from "next-connect";
@@ -27,7 +27,7 @@ const handler = nextConnect();
 handler.use(upload.single("avatar")); // 'avatar' is field name
 
 handler.put(async (req, res) => {
-  await dbConnect();
+  await connectDB();
   const sessionUser = await requireAuth(req, res);
   if (!sessionUser) return;
 

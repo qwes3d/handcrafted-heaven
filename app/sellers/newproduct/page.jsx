@@ -1,3 +1,5 @@
+//app/sellers/newproduct/page.jsx
+
 "use client";
 
 import { useState } from "react";
@@ -15,9 +17,10 @@ export default function NewProduct() {
     description: "",
     category: "",
     price: "",
-    image: "",
+    imagePreview: "",
     file: null,
   });
+
   const [loading, setLoading] = useState(false);
 
   if (!user) return <p className="text-center mt-20">Please log in</p>;
@@ -31,10 +34,12 @@ export default function NewProduct() {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
     setForm((prev) => ({ ...prev, file }));
 
     const reader = new FileReader();
-    reader.onload = () => setForm((prev) => ({ ...prev, image: reader.result }));
+    reader.onload = () =>
+      setForm((prev) => ({ ...prev, imagePreview: reader.result }));
     reader.readAsDataURL(file);
   };
 
@@ -48,9 +53,10 @@ export default function NewProduct() {
       data.append("description", form.description);
       data.append("category", form.category);
       data.append("price", form.price);
+      data.append("sellerId", user.id); // AUTO-ASSIGNED
       if (form.file) data.append("image", form.file);
 
-      await axios.post("/seller/add-product", data, {
+      await axios.post("/sellers/add-product", data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
@@ -66,7 +72,9 @@ export default function NewProduct() {
 
   return (
     <main className="p-6 max-w-xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Add New Product</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">
+        Add New Product
+      </h1>
 
       <form
         onSubmit={handleSubmit}
@@ -78,7 +86,7 @@ export default function NewProduct() {
           onChange={handleChange}
           placeholder="Product Title"
           required
-          className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full border border-gray-300 rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
 
         <textarea
@@ -87,8 +95,8 @@ export default function NewProduct() {
           onChange={handleChange}
           placeholder="Product Description"
           required
-          className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
           rows={4}
+          className="w-full border border-gray-300 rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
 
         <input
@@ -96,7 +104,7 @@ export default function NewProduct() {
           value={form.category}
           onChange={handleChange}
           placeholder="Category (optional)"
-          className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full border border-gray-300 rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
 
         <input
@@ -106,19 +114,19 @@ export default function NewProduct() {
           onChange={handleChange}
           placeholder="Price (GH₵)"
           required
-          className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full border border-gray-300 rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
 
         <input
           type="file"
           accept="image/*"
           onChange={handleFileChange}
-          className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          className="w-full border border-gray-300 rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
 
-        {form.image && (
+        {form.imagePreview && (
           <img
-            src={form.image}
+            src={form.imagePreview}
             alt="Preview"
             className="h-48 w-full object-cover rounded-lg mt-2 border"
           />

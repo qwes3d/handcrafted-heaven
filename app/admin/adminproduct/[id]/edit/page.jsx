@@ -79,21 +79,23 @@ export default function EditProductPage() {
       <form onSubmit={handleSubmit}>
         <div>
           <label>Title</label>
-          <input
-            type="text"
-            value={form.title}
-            onChange={e => setForm({ ...form, title: e.target.value })}
-            required
-          />
+            <input
+              type="text"
+              className="w-full border rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={form.title}
+              onChange={e => setForm({ ...form, title: e.target.value })}
+              required
+            />
         </div>
 
         <div>
           <label>Description</label>
-          <textarea
-            value={form.description}
-            onChange={e => setForm({ ...form, description: e.target.value })}
-            required
-          />
+            <textarea
+              className="w-full border rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={form.description}
+              onChange={e => setForm({ ...form, description: e.target.value })}
+              required
+            />
         </div>
 
         <div>
@@ -107,12 +109,13 @@ export default function EditProductPage() {
 
         <div>
           <label>Price</label>
-          <input
-            type="number"
-            value={form.price}
-            onChange={e => setForm({ ...form, price: e.target.value })}
-            required
-          />
+            <input
+              type="number"
+              className="w-full border rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={form.price}
+              onChange={e => setForm({ ...form, price: e.target.value })}
+              required
+            />
         </div>
 
         <div>
@@ -126,11 +129,12 @@ export default function EditProductPage() {
 
         <div>
           <label>Image URLs (one per line)</label>
-          <textarea
-            value={form.images}
-            onChange={e => setForm({ ...form, images: e.target.value })}
-            required
-          />
+            <textarea
+              className="w-full border rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={form.images}
+              onChange={e => setForm({ ...form, images: e.target.value })}
+              required
+            />
         </div>
 
         <div>

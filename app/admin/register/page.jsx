@@ -49,7 +49,7 @@ export default function AdminRegisterPage() {
           onChange={e => setEmail(e.target.value)}
           placeholder="Email"
           required
-          className="block border p-2 w-full"
+          className="w-full border rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
         <input
           type="password"
@@ -57,7 +57,7 @@ export default function AdminRegisterPage() {
           onChange={e => setPassword(e.target.value)}
           placeholder="Password"
           required
-          className="block border p-2 w-full"
+          className="w-full border rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
         <input
           type="password"
@@ -65,7 +65,7 @@ export default function AdminRegisterPage() {
           onChange={e => setConfirmPassword(e.target.value)}
           placeholder="Confirm Password"
           required
-          className="block border p-2 w-full"
+          className="w-full border rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
         <input
           type="phone"
@@ -73,7 +73,7 @@ export default function AdminRegisterPage() {
           onChange={e => setPhone(e.target.value)}
           placeholder="phone"
           required
-          className="block border p-2 w-full"
+          className="w-full border rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
 
         <button type="submit" className="w-full px-4 py-2 bg-green-600 text-white">

@@ -55,6 +55,7 @@ export default function LoginPage() {
         placeholder="Email"
         type="email"
         required
+        className="w-full border rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
       <input
         value={password}
@@ -62,6 +63,7 @@ export default function LoginPage() {
         type="password"
         placeholder="Password"
         required
+        className="w-full border rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
       <button type="submit">Login</button>
     </form>

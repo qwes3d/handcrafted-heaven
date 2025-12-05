@@ -1,4 +1,5 @@
 "use client";
+//app/profile/page.jsx
 import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -53,8 +54,8 @@ export default function ProfilePage() {
 
       if (file) {
         const formData = new FormData();
-        formData.append("file", file);
-        const uploadRes = await axios.post("/upload/profile-pic", formData, {
+        formData.append("image", file);
+        const uploadRes = await axios.post("/profile/pic", formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         avatarUrl = uploadRes.data.url;

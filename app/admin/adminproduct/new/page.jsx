@@ -29,11 +29,11 @@ export default function NewProductPage() {
 
   return (
     <form onSubmit={handleSubmit} className="p-4 space-y-4">
-      <input value={sellerId} onChange={e => setSellerId(e.target.value)} placeholder="Seller Id" required />
-      <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title" required />
-      <textarea value={description} onChange={e => setDescription(e.target.value)} placeholder="Description" required />
-      <input value={images} onChange={e => setImages(e.target.value)} placeholder="Image URLs (comma separated)" required />
-      <input type="number" value={price} onChange={e => setPrice(Number(e.target.value))} placeholder="Price" required />
+      <input className="w-full border rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" value={sellerId} onChange={e => setSellerId(e.target.value)} placeholder="Seller Id" required />
+      <input className="w-full border rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" value={title} onChange={e => setTitle(e.target.value)} placeholder="Title" required />
+      <textarea className="w-full border rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" value={description} onChange={e => setDescription(e.target.value)} placeholder="Description" required />
+      <input className="w-full border rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" value={images} onChange={e => setImages(e.target.value)} placeholder="Image URLs (comma separated)" required />
+      <input className="w-full border rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" type="number" value={price} onChange={e => setPrice(Number(e.target.value))} placeholder="Price" required />
       <button type="submit">Create Product</button>
     </form>
   );

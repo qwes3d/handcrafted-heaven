@@ -56,7 +56,7 @@ export default function BecomeSeller() {
 
       if (res.data?.success) {
         showToast("You are now a seller!", "success");
-        setTimeout(() => window.location.href = "/sellers/dashboard", 1000);
+        setTimeout(() => window.location.href = "/login", 1000);
       } else {
         showToast(res.data.error || "Error becoming a seller", "error");
       }
@@ -78,7 +78,7 @@ export default function BecomeSeller() {
             name="businessName"
             onChange={handleText}
             required
-            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+            className="w-full p-3 border rounded-lg text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
@@ -89,7 +89,7 @@ export default function BecomeSeller() {
             name="address"
             onChange={handleText}
             required
-            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+            className="w-full p-3 border rounded-lg text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
@@ -100,7 +100,7 @@ export default function BecomeSeller() {
             name="phone"
             onChange={handleText}
             required
-            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+            className="w-full p-3 border rounded-lg text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
@@ -112,7 +112,7 @@ export default function BecomeSeller() {
             rows="4"
             onChange={handleText}
             placeholder="Tell customers about your craft, story, or shop…"
-            className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 text-gray-900"
+            className="w-full p-3 border rounded-lg text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           ></textarea>
         </div>
 
