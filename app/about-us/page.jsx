@@ -5,11 +5,11 @@ import FloatingContact from "@/ui/floatingcontact";
 
 export default function AboutUs() {
   const founders = [
-    { name: "Anyalechi Chidiebere", role: "lead project", whatsapp: "+233556522861" },
-    { name: "George", role: "team member", whatsapp: "+2348065104250" },
-    { name: "Onyekachim Miracle", role: "team member", whatsapp: "+2347043830600" },
-    { name: "Akpan Micheal", role: "team member", whatsapp: "+23470397313987" },
-    { name: "David Whitten", role: "team member", whatsapp: "+18327778399" },
+    { name: "Anyalechi Chidiebere", role: "Lead project", whatsapp: "+233556522861" },
+    { name: "George", role: "Team member", whatsapp: "+2348065104250" },
+    { name: "Onyekachim Miracle", role: "Team member", whatsapp: "+2347043830600" },
+    { name: "Akpan Micheal", role: "Team member", whatsapp: "+23470397313987" },
+    { name: "David Whitten", role: "Team member", whatsapp: "+18327778399" },
   ];
 
   return (

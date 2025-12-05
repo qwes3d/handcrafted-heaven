@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "@/lib/axiosInstance";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 export default function SellerDashboard() {
   const { data: session } = useSession();
@@ -91,14 +92,13 @@ export default function SellerDashboard() {
     <main className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Seller Dashboard</h1>
-        <a
+        <Link
           href="/sellers/newproduct"
           className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition"
         >
           + Add Product
-        </a>
+        </Link>
       </div>
-
       {loading ? (
         <p>Loading products...</p>
       ) : products.length === 0 ? (
