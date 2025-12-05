@@ -15,7 +15,7 @@ export default function PersonalInfoForm({ userData, canEdit, onChange }) {
           value={userData.firstName || ""}
           onChange={handleChange}
           disabled={!canEdit}
-          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100"
+          className="w-full border border-gray-300 rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100"
         />
       </div>
       <div>
@@ -25,7 +25,7 @@ export default function PersonalInfoForm({ userData, canEdit, onChange }) {
           value={userData.lastName || ""}
           onChange={handleChange}
           disabled={!canEdit}
-          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100"
+          className="w-full border border-gray-300 rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100"
         />
       </div>
       <div className="md:col-span-2">

@@ -5,11 +5,11 @@ import FloatingContact from "@/ui/floatingcontact";
 
 export default function AboutUs() {
   const founders = [
-    { name: "Anyalechi Chidiebere", role: "Founder & CEO", whatsapp: "1234567890" },
-    { name: "George", role: "Co-Founder & CTO", whatsapp: "9876543210" },
-    { name: "Onyekachim", role: "co-founder", whatsapp: "663872838" },
-    { name: "Akpan Micheal", role: "Co-Founder & COO", whatsapp: "1928374650" },
-    { name: "Whitten", role: "Co-Founder & CMO", whatsapp: "5647382910" },
+    { name: "Anyalechi Chidiebere", role: "lead project", whatsapp: "+233556522861" },
+    { name: "George", role: "team member", whatsapp: "+2348065104250" },
+    { name: "Onyekachim Miracle", role: "team member", whatsapp: "+2347043830600" },
+    { name: "Akpan Micheal", role: "team member", whatsapp: "+23470397313987" },
+    { name: "David Whitten", role: "team member", whatsapp: "+18327778399" },
   ];
 
   return (
@@ -45,17 +45,17 @@ export default function AboutUs() {
 
       {/* Map Section */}
       <section className="mb-16">
-        <h2 className="text-3xl font-semibold text-gray-800 mb-4 text-center">Our Location</h2>
-        <div className="w-full h-96 rounded-xl overflow-hidden shadow-lg">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!..." // replace with actual map embed
-            className="w-full h-full border-0"
-            allowFullScreen=""
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          ></iframe>
-        </div>
-      </section>
+  <h2 className="text-3xl font-semibold text-gray-800 mb-4 text-center">Our Location</h2>
+  <div className="w-full h-96 rounded-xl overflow-hidden shadow-lg">
+    <iframe
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.9139764675474!2d-0.1910555250146714!3d5.579734094400875!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf9a61b3e29cc9%3A0x807dc2012dc1bae1!2sThe%20Flagstaff%20House%2C%20Accra!5e0!3m2!1sen!2sgh!4v1764950568302!5m2!1sen!2sgh"
+      className="w-full h-full border-0"
+      allowFullScreen=""
+      loading="lazy"
+      referrerPolicy="no-referrer-when-downgrade"
+    ></iframe>
+  </div>
+</section>
 
       <FloatingContact />
     </main>

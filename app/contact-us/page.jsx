@@ -1,5 +1,7 @@
 // app/contact-us/page.jsx
 
+'use client';
+
 import { useState } from "react";
 import axios from "@/lib/axiosInstance";
 import FloatingContact from "@/ui/floatingcontact";
@@ -39,7 +41,7 @@ export default function ContactUs() {
           value={form.name}
           onChange={handleChange}
           required
-          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+          className="w-full p-3 border rounded-lg text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
         <input
           type="email"
@@ -48,7 +50,7 @@ export default function ContactUs() {
           value={form.email}
           onChange={handleChange}
           required
-          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+          className="w-full p-3 border rounded-lg text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
         <textarea
           name="message"
@@ -57,7 +59,7 @@ export default function ContactUs() {
           value={form.message}
           onChange={handleChange}
           required
-          className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+          className="w-full p-3 border rounded-lg text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         ></textarea>
         <button
           type="submit"

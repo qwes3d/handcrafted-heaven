@@ -54,6 +54,8 @@ export default function ProductsPage() {
               product={p}
               addToCart={handleCartToggle}
               inCart={cartItems.some((item) => item._id === p._id)}
+              removeFromCart={ removeFromCart }
+            
             />
           ))}
         </div>

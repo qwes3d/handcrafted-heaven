@@ -102,6 +102,7 @@ export default function EditProductPage() {
           <label>Category</label>
           <input
             type="text"
+            className="w-full border rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={form.category}
             onChange={e => setForm({ ...form, category: e.target.value })}
           />
@@ -122,6 +123,7 @@ export default function EditProductPage() {
           <label>Discount Price</label>
           <input
             type="number"
+            className="w-full border rounded px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             value={form.discountPrice}
             onChange={e => setForm({ ...form, discountPrice: e.target.value })}
           />

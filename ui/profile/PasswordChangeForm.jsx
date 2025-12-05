@@ -15,7 +15,7 @@ export default function PasswordChangeForm({ passwords, onChange }) {
         placeholder="Current Password"
         value={passwords.current}
         onChange={handleChange}
-        className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className="w-full border px-3 py-2 rounded text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
       <input
         type="password"
@@ -23,7 +23,7 @@ export default function PasswordChangeForm({ passwords, onChange }) {
         placeholder="New Password"
         value={passwords.new}
         onChange={handleChange}
-        className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className="w-full border px-3 py-2 rounded text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
       <input
         type="password"
@@ -31,7 +31,7 @@ export default function PasswordChangeForm({ passwords, onChange }) {
         placeholder="Confirm New Password"
         value={passwords.confirm}
         onChange={handleChange}
-        className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        className="w-full border px-3 py-2 rounded text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
       />
     </div>
   );

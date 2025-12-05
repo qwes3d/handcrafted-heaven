@@ -63,7 +63,7 @@ export default function FloatingContact() {
             value={form.name}
             onChange={handleChange}
             required
-            className="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500 outline-none"
+            className="w-full p-2 border rounded text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
           <input
             type="email"
@@ -72,7 +72,7 @@ export default function FloatingContact() {
             value={form.email}
             onChange={handleChange}
             required
-            className="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500 outline-none"
+            className="w-full p-2 border rounded text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
           <textarea
             name="message"
@@ -81,7 +81,7 @@ export default function FloatingContact() {
             value={form.message}
             onChange={handleChange}
             required
-            className="w-full p-2 border rounded focus:ring-2 focus:ring-indigo-500 outline-none"
+            className="w-full p-2 border rounded text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
           <button
             type="submit"
