@@ -1,7 +1,7 @@
 // /app/api/auth/register/route.js
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import {connectDB} from "@/lib/mongodb";
+import {connectDB} from "@/lib/db";
 import User from "@/models/user";
 
 export async function POST(req) {
