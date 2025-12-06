@@ -1,46 +1,52 @@
-//app/api/sellers/add-product/routes.js
+//app/api/sellers/add-product/route.js
 
 import { NextResponse } from "next/server";
-import { getUserFromRequest } from "@/lib/authconfig";
 import { connectDB } from "@/lib/db";
+import { getUserFromRequest } from "@/lib/authconfig";
 import { sellerCreateProduct } from "@/controllers/sellerproductcontroller";
+import { uploadImage } from "@/lib/cloudinary";
 
 export async function POST(req) {
   try {
     await connectDB();
 
-    const user = await getUserFromRequest();
-    if (!user) {
+    // ✅ Get authenticated user
+    const user = await getUserFromRequest(req);
+    if (!user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    if (user.role !== "seller") {
-      return NextResponse.json({ error: "Only sellers can add products" }, { status: 403 });
-    }
+    if (user.role !== "seller")
+      return NextResponse.json(
+        { error: "Only sellers can add products" },
+        { status: 403 }
+      );
 
     const formData = await req.formData();
 
+    // ✅ Prepare product data
     const productData = {
       title: formData.get("title"),
       description: formData.get("description"),
       category: formData.get("category"),
-      price: formData.get("price"),
-      sellerId: formData.get("sellerId"), // must match frontend
-      images: [], // will store base64 or URLs later
+      price: Number(formData.get("price")),
+      sellerId: user.id,
+      images: [],
     };
 
-    const file = formData.get("image");
-    if (file && typeof file === "object") {
-      const buffer = Buffer.from(await file.arrayBuffer());
-      const base64Image = `data:${file.type};base64,${buffer.toString("base64")}`;
-      productData.images.push(base64Image);
+    // ✅ Support multiple images
+    const images = formData.getAll("image");
+    for (const img of images) {
+      if (img && typeof img === "object") {
+        const buffer = Buffer.from(await img.arrayBuffer());
+        const uploaded = await uploadImage(buffer); // should return { secure_url }
+        productData.images.push(uploaded.secure_url);
+      }
     }
 
-    const result = await sellerCreateProduct(productData, user);
+    const newProduct = await sellerCreateProduct(productData, user);
 
-    return NextResponse.json(result, { status: 201 });
-  } catch (error) {
-    console.error("Add Product Error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(newProduct, { status: 201 });
+  } catch (err) {
+    console.error("Add Product Error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

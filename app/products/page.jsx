@@ -1,4 +1,3 @@
-// app/products/page.jsx
 "use client";
 
 import { useContext, useState, useEffect } from "react";
@@ -18,22 +17,27 @@ export default function ProductsPage() {
     async function fetchProducts() {
       setLoading(true);
       try {
-        const queryString = searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : "";
+        const queryString = searchQuery
+          ? `?search=${encodeURIComponent(searchQuery)}`
+          : "";
+
+        // Fixed — API path must be "/api/products"
         const res = await axios.get(`/products${queryString}`);
+
         setProducts(res.data);
       } catch (err) {
-        console.error(err);
+        console.error("Failed fetching products:", err);
       } finally {
         setLoading(false);
       }
     }
+
     fetchProducts();
   }, [searchQuery]);
 
   const handleCartToggle = (product) => {
     const inCart = cartItems.some((item) => item._id === product._id);
-    if (inCart) removeFromCart(product._id);
-    else addToCart(product);
+    inCart ? removeFromCart(product._id) : addToCart(product);
   };
 
   return (
@@ -54,8 +58,7 @@ export default function ProductsPage() {
               product={p}
               addToCart={handleCartToggle}
               inCart={cartItems.some((item) => item._id === p._id)}
-              removeFromCart={ removeFromCart }
-            
+              removeFromCart={removeFromCart}
             />
           ))}
         </div>

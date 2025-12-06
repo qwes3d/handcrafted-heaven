@@ -20,28 +20,32 @@ export default function SellerDashboard() {
     loadProducts();
   }, [user]);
 
+  /** Load products for this seller */
   async function loadProducts() {
+    if (!user) return;
+
     try {
       setLoading(true);
-      const res = await axios.get("/products");
-      setProducts(res.data.filter((p) => p.sellerId === user.id));
+      const res = await axios.get(`/api/products?owner=${user.id}`);
+      setProducts(res.data);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to load products:", err);
     } finally {
       setLoading(false);
     }
   }
 
+  /** Start editing a product */
   function beginEdit(p) {
     setEditingId(p._id);
     setFormState({
       title: p.title,
-      sellerId: p.sellerId,
       description: p.description,
       category: p.category,
       price: p.price,
-      image: p.images?.[0] || "",
-      file: null,
+      existingImages: p.images || [],
+      files: [], // new files selected
+      imagePreviews: p.images || [],
     });
   }
 
@@ -50,16 +54,20 @@ export default function SellerDashboard() {
     setFormState({});
   }
 
+  /** Save edits, including multiple images */
   async function saveEdit(id) {
     try {
       setSavingId(id);
       const data = new FormData();
       data.append("title", formState.title);
-      data.append("sellerId", formState.sellerId);
       data.append("description", formState.description);
       data.append("category", formState.category);
       data.append("price", formState.price);
-      if (formState.file) data.append("image", formState.file);
+
+      // Append new files if any
+      if (formState.files?.length > 0) {
+        formState.files.forEach((file) => data.append("image", file));
+      }
 
       await axios.put(`/sellers/update/${id}`, data, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -75,6 +83,7 @@ export default function SellerDashboard() {
     }
   }
 
+  /** Delete a product */
   async function deleteProduct(id) {
     if (!confirm("Delete this product?")) return;
     try {
@@ -83,6 +92,15 @@ export default function SellerDashboard() {
     } catch (err) {
       alert("Delete failed");
     }
+  }
+
+  /** Handle file input change */
+  function handleFileChange(e) {
+    const files = Array.from(e.target.files);
+    setFormState((s) => ({ ...s, files }));
+
+    const previews = files.map((file) => URL.createObjectURL(file));
+    setFormState((s) => ({ ...s, imagePreviews: [...(s.existingImages || []), ...previews] }));
   }
 
   if (!user) return <p>Please log in</p>;
@@ -99,6 +117,7 @@ export default function SellerDashboard() {
           + Add Product
         </Link>
       </div>
+
       {loading ? (
         <p>Loading products...</p>
       ) : products.length === 0 ? (
@@ -121,30 +140,15 @@ export default function SellerDashboard() {
                         setFormState((s) => ({ ...s, title: e.target.value }))
                       }
                       placeholder="Title"
-                      className="w-full border px-2 py-1 rounded mb-1 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    />
-                    <input
-                      type="text"
-                      value={formState.sellerId}
-                      onChange={(e) =>
-                        setFormState((s) => ({
-                          ...s,
-                          sellerId: e.target.value,
-                        }))
-                      }
-                      placeholder="Seller ID"
-                      className="w-full border px-2 py-1 rounded mb-1 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full border px-2 py-1 rounded mb-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                     <textarea
                       value={formState.description}
                       onChange={(e) =>
-                        setFormState((s) => ({
-                          ...s,
-                          description: e.target.value,
-                        }))
+                        setFormState((s) => ({ ...s, description: e.target.value }))
                       }
                       placeholder="Description"
-                      className="w-full border px-2 py-1 rounded mb-1 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full border px-2 py-1 rounded mb-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                     <input
                       type="text"
@@ -153,7 +157,7 @@ export default function SellerDashboard() {
                         setFormState((s) => ({ ...s, category: e.target.value }))
                       }
                       placeholder="Category"
-                      className="w-full border px-2 py-1 rounded mb-1 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full border px-2 py-1 rounded mb-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                     <input
                       type="number"
@@ -162,40 +166,35 @@ export default function SellerDashboard() {
                         setFormState((s) => ({ ...s, price: e.target.value }))
                       }
                       placeholder="Price"
-                      className="w-full border px-2 py-1 rounded mb-1 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-full border px-2 py-1 rounded mb-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
-                    {formState.image && (
-                      <img
-                        src={formState.image}
-                        alt="Preview"
-                        className="h-32 w-full object-cover mb-1 rounded"
-                      />
-                    )}
+
+                    {/* Image previews */}
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {formState.imagePreviews?.map((img, idx) => (
+                        <img key={idx} src={img} className="h-20 w-20 object-cover rounded" />
+                      ))}
+                    </div>
+
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (!file) return;
-                        setFormState((s) => ({ ...s, file }));
-                        const reader = new FileReader();
-                        reader.onload = () =>
-                          setFormState((s) => ({ ...s, image: reader.result }));
-                        reader.readAsDataURL(file);
-                      }}
-                      className="w-full mb-1 text-base font-semibold text-gray-900 placeholder-gray-500"
+                      multiple
+                      onChange={handleFileChange}
+                      className="mb-2"
                     />
+
                     <div className="flex gap-2">
                       <button
                         onClick={() => saveEdit(p._id)}
                         disabled={savingId === p._id}
-                        className="flex-1 bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 transition disabled:opacity-50"
+                        className="flex-1 bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700 disabled:opacity-50"
                       >
                         {savingId === p._id ? "Saving..." : "Save"}
                       </button>
                       <button
                         onClick={cancelEdit}
-                        className="flex-1 bg-gray-300 px-2 py-1 rounded hover:bg-gray-400 transition"
+                        className="flex-1 bg-gray-300 px-2 py-1 rounded hover:bg-gray-400"
                       >
                         Cancel
                       </button>
@@ -214,13 +213,13 @@ export default function SellerDashboard() {
                     <div className="flex justify-between mt-2">
                       <button
                         onClick={() => beginEdit(p)}
-                        className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 transition flex-1 mr-1"
+                        className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 flex-1 mr-1"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => deleteProduct(p._id)}
-                        className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 transition flex-1 ml-1"
+                        className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 flex-1 ml-1"
                       >
                         Delete
                       </button>

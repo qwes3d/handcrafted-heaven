@@ -3,70 +3,78 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 
-// Category images (make sure these paths exist)
+// Category images (replace with Cloudinary URLs)
 const categoryImages = {
   "Decor": [
-    "/images/categories/decor1.jpg",
-    "/images/categories/decor.jpg",
-    "/images/categories/decor23.jpg"
+    "https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1690000000/decor1.jpg",
+    "https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1690000000/decor.jpg",
+    "https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1690000000/decor23.jpg"
   ],
   "Jewelry": [
-    "/images/categories/jewelry1.jpg",
-    "/images/categories/jewelry.jpg",
-    "/images/categories/beaded-necklace.jpg"
+    "https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1690000000/jewelry1.jpg",
+    "https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1690000000/jewelry.jpg",
+    "https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1690000000/beaded-necklace.jpg"
   ],
   "Footwear": [
-    "/images/categories/sandals.webp",
-    "/images/categories/sandals2.webp"
+    "https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1690000000/sandals.webp",
+    "https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1690000000/sandals2.webp"
   ],
   "Kitchenware": [
-    "/images/categories/kitchen1.jpg",
-    "/images/categories/bowl.jpg",
-    "/images/categories/kitchen23.jpg"
+    "https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1690000000/kitchen1.jpg",
+    "https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1690000000/bowl.jpg",
+    "https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1690000000/kitchen23.jpg"
   ],
   "Musical instruments": [
-    "/images/categories/ekwe.jpg",
-    "/images/categories/drum.jpg",
-    "/images/categories/ogene.jpg"
+    "https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1690000000/ekwe.jpg",
+    "https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1690000000/drum.jpg",
+    "https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1690000000/ogene.jpg"
   ],
   "Accessories": [
-    "/images/categories/blanket.jpg",
-    "/images/categories/accessory1.jpg"
+    "https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1690000000/blanket.jpg",
+    "https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1690000000/accessory1.jpg"
   ]
 };
 
+// Helper: Cloudinary resizing (optional)
+const cloudinaryUrl = (url, width = 400, height = 300) => {
+  if (!url.includes("res.cloudinary.com")) return url;
+  return url.replace("/upload/", `/upload/w_${width},h_${height},c_fill/`);
+};
+
 export default function CategoryCard({ category }) {
-  // ✅ Normalize category name (case-insensitive)
   const normalizedCategory =
     category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
 
-  // ✅ Always define images (fallback)
   const images = categoryImages[normalizedCategory] || ["/images/categories/home1.jpg"];
-
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     if (!images || images.length === 0) return;
 
     const interval = setInterval(() => {
-      let nextIndex;
-      do {
-        nextIndex = Math.floor(Math.random() * images.length);
-      } while (nextIndex === currentIndex && images.length > 1);
-      setCurrentIndex(nextIndex);
+      setCurrentIndex(prev => {
+        let next;
+        do {
+          next = Math.floor(Math.random() * images.length);
+        } while (next === prev && images.length > 1);
+        return next;
+      });
     }, 4000);
 
     return () => clearInterval(interval);
-  }, [currentIndex, images]);
+  }, [images]);
 
   return (
     <div className="text-center">
-      <Link href={`/products?category=${normalizedCategory}`}>
+      <Link
+        href={`/products?category=${normalizedCategory}`}
+        aria-label={`Browse ${normalizedCategory} products`}
+      >
         <div className="w-64 h-44 rounded-2xl overflow-hidden shadow-lg cursor-pointer relative group">
           <AnimatePresence mode="wait">
             <motion.img
               key={currentIndex}
-              src={images[currentIndex]}
+              src={cloudinaryUrl(images[currentIndex])}
               alt={normalizedCategory}
               className="w-full h-full object-cover absolute top-0 left-0 group-hover:scale-105 transition-transform duration-700"
               initial={{ opacity: 0, scale: 1.05 }}
@@ -76,7 +84,6 @@ export default function CategoryCard({ category }) {
             />
           </AnimatePresence>
 
-          {/* Optional overlay for style */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500"></div>
         </div>
       </Link>

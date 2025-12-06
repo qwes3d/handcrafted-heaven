@@ -1,4 +1,5 @@
 "use client";
+//app/sellers/[id]/page.jsx
 
 import { useEffect, useState } from "react";
 import axios from "@/lib/axiosInstance";

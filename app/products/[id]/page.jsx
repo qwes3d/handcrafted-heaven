@@ -21,7 +21,7 @@ export default function ProductDetail() {
         const res = await axios.get(`/products/${id}`);
         setProduct(res.data);
       } catch (err) {
-        console.error(err);
+        console.error("Failed to load product:", err);
       } finally {
         setLoading(false);
       }
@@ -45,6 +45,11 @@ export default function ProductDetail() {
     );
   }
 
+  // Cloudinary-safe image handling
+  const imageSrc = Array.isArray(product.images)
+    ? product.images[0]
+    : product.images || "/images/placeholder.jpg";
+
   return (
     <main className="max-w-7xl mx-auto px-4 py-10">
 
@@ -65,7 +70,7 @@ export default function ProductDetail() {
         <div className="sticky top-24">
           <div className="border rounded-xl overflow-hidden shadow-sm">
             <img
-              src={product.images?.[0] || "/images/placeholder.jpg"}
+              src={imageSrc}
               alt={product.title || product.name}
               className="w-full h-auto object-cover"
             />
@@ -84,7 +89,7 @@ export default function ProductDetail() {
             Category: <span className="text-gray-800">{product.category}</span>
           </p>
 
-          {/* RATING DISPLAY */}
+          {/* RATING */}
           <div className="mt-4 flex items-center gap-2">
             <RatingStars productId={product._id} size="lg" />
             <span className="text-sm text-gray-600">Customer ratings</span>

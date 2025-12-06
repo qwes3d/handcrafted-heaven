@@ -1,9 +1,20 @@
+// app/api/users/me/avatar/route.js
 import { connectDB } from "@/lib/db";
 import User from "@/models/user";
 import { requireAuth } from "@/middleware/requireAuth";
 import { NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { v2 as cloudinary } from "cloudinary";
+
+// Ensure Node.js runtime (required for Cloudinary)
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+// Cloudinary config
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function PUT(req) {
   await connectDB();
@@ -22,21 +33,39 @@ export async function PUT(req) {
     }
 
     // Convert file to buffer
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
-    // Ensure folder exists
-    const uploadDir = path.join(process.cwd(), "public/uploads/avatars");
-    await fs.mkdir(uploadDir, { recursive: true });
+    // Upload directly to Cloudinary
+    const uploadResponse = await cloudinary.uploader.upload_stream(
+      {
+        folder: "avatars",
+        resource_type: "image",
+      },
+      async (error, result) => {
+        if (error) throw error;
+        return result;
+      }
+    );
 
-    const filePath = path.join(uploadDir, `${Date.now()}-${file.name}`);
-    await fs.writeFile(filePath, buffer);
+    // Cloudinary upload via stream
+    await new Promise((resolve, reject) => {
+      const stream = cloudinary.uploader.upload_stream(
+        { folder: "avatars" },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      stream.end(buffer);
+    });
 
-    const publicPath = `/uploads/avatars/${path.basename(filePath)}`;
+    const avatarUrl = uploadResponse.secure_url;
 
+    // Update user avatar in DB
     const user = await User.findByIdAndUpdate(
       sessionUser.id,
-      { avatar: publicPath },
+      { avatar: avatarUrl },
       { new: true }
     ).select("-password");
 

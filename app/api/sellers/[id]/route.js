@@ -5,111 +5,109 @@ import User from "@/models/user";
 import Product from "@/models/products";
 import mongoose from "mongoose";
 import { getUserFromRequest } from "@/lib/authconfig";
+import { NextResponse } from "next/server";
+import { v2 as cloudinary } from "cloudinary";
 
-//
-// GET — Public seller page OR logged-in seller "me"
-// ---------------------------------------------------
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+// Cloudinary config
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 export async function GET(req, ctx) {
   await connectDB();
   const { id } = await ctx.params;
 
-  // If the frontend requests /api/sellers/me
+  // Fetch logged-in seller info if id === "me"
   if (id === "me") {
     const user = await getUserFromRequest();
-    if (!user) {
-      return Response.json({ error: "Not authenticated" }, { status: 401 });
-    }
+    if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
-    const products = await Product.find({ sellerId: user._id.toString() })
-                                  .sort({ createdAt: -1 });
+    const products = await Product.find({ sellerId: user._id.toString() }).sort({ createdAt: -1 });
 
-    return Response.json(
-      {
-        seller: user,
-        products,
+    return NextResponse.json({
+      seller: {
+        ...user.toObject(),
+        profilePic: user.profilePic || "/images/placeholder-avatar.jpg",
       },
-      { status: 200 }
-    );
+      products,
+    }, { status: 200 });
   }
 
-  // Validate Mongo ID
+  // Validate MongoDB ID
   if (!mongoose.Types.ObjectId.isValid(id)) {
-    return Response.json({ error: "Invalid seller ID" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid seller ID" }, { status: 400 });
   }
 
-  // Get seller info
   const seller = await User.findById(id).select("-password");
   if (!seller || seller.role !== "seller") {
-    return Response.json({ error: "Seller not found" }, { status: 404 });
+    return NextResponse.json({ error: "Seller not found" }, { status: 404 });
   }
 
-  // Get all products tied to this seller
-  const products = await Product.find({ sellerId: seller._id.toString() })
-                                .sort({ createdAt: -1 });
+  const products = await Product.find({ sellerId: seller._id.toString() }).sort({ createdAt: -1 });
 
-  return Response.json({ seller, products }, { status: 200 });
+  return NextResponse.json({
+    seller: {
+      ...seller.toObject(),
+      profilePic: seller.profilePic || "/images/placeholder-avatar.jpg",
+    },
+    products,
+  }, { status: 200 });
 }
 
-//
-// PUT — Only the seller can update his own profile
-// ---------------------------------------------------
 export async function PUT(req, ctx) {
   await connectDB();
   const { id } = await ctx.params;
 
   const user = await getUserFromRequest();
-  if (!user) {
-    return Response.json({ error: "Not authenticated" }, { status: 401 });
-  }
+  if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
-  // Only the seller can update their own account
+  // Only allow seller to update their own profile
   if (user.role !== "seller" || user._id.toString() !== id) {
-    return Response.json({ error: "Unauthorized" }, { status: 403 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
-  const data = await req.json();
-  const { profilePic, bio, businessName, phone, address } = data;
+  try {
+    const formData = await req.formData();
 
-  // Update allowed fields
-  if (profilePic !== undefined) user.profilePic = profilePic;
-  if (bio !== undefined) user.bio = bio;
-  if (businessName !== undefined) user.businessName = businessName;
-  if (phone !== undefined) user.phone = phone;
-  if (address !== undefined) user.address = address;
+    // Upload profilePic to Cloudinary if present
+    const file = formData.get("profilePic");
+    if (file && typeof file === "object") {
+      const buffer = Buffer.from(await file.arrayBuffer());
+      const uploaded = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { folder: "sellers/profilePics" },
+          (err, result) => (err ? reject(err) : resolve(result))
+        ).end(buffer);
+      });
+      user.profilePic = uploaded.secure_url;
+    }
 
-  await user.save();
+    // Update allowed fields
+    const fields = ["bio", "businessName", "phone", "address"];
+    fields.forEach((field) => {
+      const value = formData.get(field);
+      if (value) user[field] = value;
+    });
 
-  return Response.json(
-    { message: "Seller profile updated", user },
-    { status: 200 }
-  );
-}
+    await user.save();
 
-//
-// DELETE — Seller deletes his account + all products
-// ---------------------------------------------------
-export async function DELETE(req, ctx) {
-  await connectDB();
-  const { id } = await ctx.params;
-
-  const user = await getUserFromRequest();
-  if (!user) {
-    return Response.json({ error: "Not authenticated" }, { status: 401 });
+    return NextResponse.json(
+      {
+        message: "Seller profile updated",
+        user: {
+          ...user.toObject(),
+          profilePic: user.profilePic || "/images/placeholder-avatar.jpg",
+        },
+      },
+      { status: 200 }
+    );
+  } catch (err) {
+    console.error("Update Seller Error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
-
-  // Only the seller can delete himself
-  if (user.role !== "seller" || user._id.toString() !== id) {
-    return Response.json({ error: "Unauthorized" }, { status: 403 });
-  }
-
-  // Remove seller’s products first
-  await Product.deleteMany({ sellerId: user._id.toString() });
-
-  // Remove seller account
-  await User.findByIdAndDelete(user._id);
-
-  return Response.json(
-    { message: "Seller account and products deleted." },
-    { status: 200 }
-  );
 }

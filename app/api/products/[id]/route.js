@@ -1,42 +1,66 @@
-// Example: /api/products/[id]/route.js
-
-import { getProductById, updateProduct, deleteProduct } from "@/controllers/productcontroller";
+import { NextResponse } from "next/server";
+import { connectDB } from "@/lib/db";
+import Product from "@/models/products";
 import { productUpdateSchema } from "@/validation/validators";
 
-export async function GET(request, { params }) {
+export async function GET(req, { params }) {
   try {
-    const { id } = await params;           // ✅ await params
-    const product = await getProductById(id);
+    await connectDB();
+    const { id } = await params; // ✅ unwrap the promise
+
+    const product = await Product.findById(id).populate("sellerId", "businessName email profilePic bio");
     if (!product) {
-      return Response.json({ error: "Not found" }, { status: 404 });
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
-    return Response.json(product);
+
+    return NextResponse.json(product);
   } catch (err) {
-    return Response.json({ error: err.message }, { status: 500 });
+    console.error(err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
-export async function PUT(request, { params }) {
+export async function PUT(req, { params }) {
   try {
-    const { id } = await params;           // ✅ await params
-    const body = await request.json();
+    await connectDB();
+    const { id } = await params; // ✅ unwrap promise
+
+    const body = await req.json();
     const parsed = productUpdateSchema.safeParse(body);
+
     if (!parsed.success) {
-      return Response.json(parsed.error, { status: 400 });
+      return NextResponse.json(
+        { errors: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
-    const updated = await updateProduct(id, parsed.data);
-    return Response.json(updated);
+
+    const updatedProduct = await Product.findByIdAndUpdate(id, parsed.data, { new: true });
+
+    if (!updatedProduct) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(updatedProduct);
   } catch (err) {
-    return Response.json({ error: err.message }, { status: 500 });
+    console.error(err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
 
-export async function DELETE(request, { params }) {
+export async function DELETE(req, { params }) {
   try {
-    const { id } = await params;           // ✅ await params
-    await deleteProduct(id);
-    return Response.json({ message: "Deleted" });
+    await connectDB();
+    const { id } = await params; // ✅ unwrap promise
+
+    const deleted = await Product.findByIdAndDelete(id);
+    if (!deleted) {
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "Product deleted successfully" });
   } catch (err) {
-    return Response.json({ error: err.message }, { status: 500 });
+    console.error(err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

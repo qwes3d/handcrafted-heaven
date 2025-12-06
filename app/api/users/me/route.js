@@ -1,97 +1,119 @@
 // app/api/users/me/route.js
 import { connectDB } from "@/lib/db";
 import User from "@/models/user";
-import { auth, getUserFromRequest } from "@/lib/authconfig";
+import { getUserFromRequest } from "@/lib/authconfig";
 import bcrypt from "bcryptjs";
-import fs from "fs";
-import path from "path";
-import formidable from "formidable";
+import { NextResponse } from "next/server";
+import { v2 as cloudinary } from "cloudinary";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// ❌ Removed top-level await connectDB();
+// Cloudinary config
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-// Helper: Save uploaded file to /public/uploads
-const saveFile = (file) => {
-  const uploadDir = path.join(process.cwd(), "public/uploads");
-  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-  const fileName = `${Date.now()}-${file.originalFilename}`;
-  const filePath = path.join(uploadDir, fileName);
-
-  fs.renameSync(file.filepath, filePath);
-  return `/uploads/${fileName}`;
-};
-
-export const GET = async () => {
-  await connectDB();   // ✔ Runtime only
+// GET /api/users/me
+export async function GET() {
+  await connectDB();
 
   const sessionUser = await getUserFromRequest();
   if (!sessionUser)
-    return new Response(JSON.stringify({ error: "Not authenticated" }), { status: 401 });
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
   const user = await User.findById(sessionUser.id).select("-password");
+
   if (!user)
-    return new Response(JSON.stringify({ error: "User not found" }), { status: 404 });
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-  return new Response(JSON.stringify(user), { status: 200 });
-};
+  return NextResponse.json(user);
+}
 
-export const PUT = async (req) => {
-  await connectDB();   // ✔ Runtime only
+// PUT /api/users/me
+export async function PUT(req) {
+  await connectDB();
 
   const sessionUser = await getUserFromRequest();
   if (!sessionUser)
-    return new Response(JSON.stringify({ error: "Not authenticated" }), { status: 401 });
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
   const contentType = req.headers.get("content-type") || "";
-  let updateData = {};
+  const updateData = {};
 
+  // --- 1) Handle multipart form (image + fields) ---
   if (contentType.includes("multipart/form-data")) {
-    const form = formidable({ multiples: false });
-    const { fields, files } = await new Promise((resolve, reject) =>
-      form.parse(req, (err, fields, files) =>
-        err ? reject(err) : resolve({ fields, files })
-      )
-    );
+    const form = await req.formData();
 
-    updateData = { ...fields };
+    // Extract all fields except the file
+    form.forEach((value, key) => {
+      if (key !== "profilePic") updateData[key] = value;
+    });
 
-    if (files.file) {
-      const fileUrl = saveFile(files.file);
-      updateData.profilePic = fileUrl;
+    const file = form.get("profilePic");
+
+    if (file && typeof file === "object") {
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      // Upload to Cloudinary
+      const uploadResult = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { folder: "avatars" },
+          (err, result) => {
+            if (err) reject(err);
+            else resolve(result);
+          }
+        ).end(buffer);
+      });
+
+      updateData.profilePic = uploadResult.secure_url;
     }
+
   } else {
+    // --- 2) JSON body ---
     const body = await req.json();
-    updateData = { ...body };
+    Object.assign(updateData, body);
   }
 
+  // --- 3) Password change ---
   if (updateData.newPassword) {
     const user = await User.findById(sessionUser.id);
-    const isValid = await bcrypt.compare(updateData.currentPassword, user.password);
-    if (!isValid)
-      return new Response(JSON.stringify({ error: "Current password incorrect" }), { status: 400 });
+
+    if (!await bcrypt.compare(updateData.currentPassword, user.password)) {
+      return NextResponse.json({ error: "Current password incorrect" }, { status: 400 });
+    }
 
     updateData.password = await bcrypt.hash(updateData.newPassword, 10);
   }
 
+  // Prevent dangerous field updates
   delete updateData.role;
-  delete updateData.currentPassword;
   delete updateData.newPassword;
+  delete updateData.currentPassword;
   delete updateData.confirmPassword;
 
-  const updatedUser = await User.findByIdAndUpdate(sessionUser.id, updateData, { new: true }).select("-password");
-  return new Response(JSON.stringify(updatedUser), { status: 200 });
-};
+  // --- 4) Save updated user ---
+  const updatedUser = await User.findByIdAndUpdate(
+    sessionUser.id,
+    updateData,
+    { new: true }
+  ).select("-password");
 
-export const DELETE = async () => {
-  await connectDB();   // ✔ Runtime only
+  return NextResponse.json(updatedUser);
+}
+
+// DELETE /api/users/me
+export async function DELETE() {
+  await connectDB();
 
   const sessionUser = await getUserFromRequest();
   if (!sessionUser)
-    return new Response(JSON.stringify({ error: "Not authenticated" }), { status: 401 });
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
   await User.findByIdAndDelete(sessionUser.id);
-  return new Response(JSON.stringify({ message: "User deleted" }), { status: 200 });
-};
+
+  return NextResponse.json({ message: "User deleted" });
+}

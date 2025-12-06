@@ -1,12 +1,12 @@
 //app/api/users/me.js
 
-import dbConnect from "@/lib/db";
+import {connectDB} from "@/lib/db";
 import User from "@/models/user";
 import bcrypt from "bcryptjs";
 import { requireAuth } from "@/middleware/requireAuth";
 
 export default async function handler(req, res) {
-  await dbConnect();
+  await connectDB();
 
   const sessionUser = await requireAuth(req, res);
   if (!sessionUser) return;
