@@ -7,11 +7,10 @@ import fs from "fs";
 import path from "path";
 import formidable from "formidable";
 
-export const runtime = "nodejs";       // Required for fs operations
-export const dynamic = "force-dynamic"; // Required for file uploads
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
-
-await connectDB();
+// ❌ Removed top-level await connectDB();
 
 // Helper: Save uploaded file to /public/uploads
 const saveFile = (file) => {
@@ -25,8 +24,9 @@ const saveFile = (file) => {
   return `/uploads/${fileName}`;
 };
 
-// GET /api/users/me
 export const GET = async () => {
+  await connectDB();   // ✔ Runtime only
+
   const sessionUser = await getUserFromRequest();
   if (!sessionUser)
     return new Response(JSON.stringify({ error: "Not authenticated" }), { status: 401 });
@@ -38,8 +38,9 @@ export const GET = async () => {
   return new Response(JSON.stringify(user), { status: 200 });
 };
 
-// PUT /api/users/me
 export const PUT = async (req) => {
+  await connectDB();   // ✔ Runtime only
+
   const sessionUser = await getUserFromRequest();
   if (!sessionUser)
     return new Response(JSON.stringify({ error: "Not authenticated" }), { status: 401 });
@@ -48,10 +49,11 @@ export const PUT = async (req) => {
   let updateData = {};
 
   if (contentType.includes("multipart/form-data")) {
-    // Handle file upload
     const form = formidable({ multiples: false });
     const { fields, files } = await new Promise((resolve, reject) =>
-      form.parse(req, (err, fields, files) => (err ? reject(err) : resolve({ fields, files })))
+      form.parse(req, (err, fields, files) =>
+        err ? reject(err) : resolve({ fields, files })
+      )
     );
 
     updateData = { ...fields };
@@ -61,16 +63,11 @@ export const PUT = async (req) => {
       updateData.profilePic = fileUrl;
     }
   } else {
-    // JSON body
     const body = await req.json();
     updateData = { ...body };
   }
 
-  // Password change
   if (updateData.newPassword) {
-    if (!updateData.currentPassword)
-      return new Response(JSON.stringify({ error: "Current password required" }), { status: 400 });
-
     const user = await User.findById(sessionUser.id);
     const isValid = await bcrypt.compare(updateData.currentPassword, user.password);
     if (!isValid)
@@ -79,7 +76,6 @@ export const PUT = async (req) => {
     updateData.password = await bcrypt.hash(updateData.newPassword, 10);
   }
 
-  // Prevent sensitive changes
   delete updateData.role;
   delete updateData.currentPassword;
   delete updateData.newPassword;
@@ -89,8 +85,9 @@ export const PUT = async (req) => {
   return new Response(JSON.stringify(updatedUser), { status: 200 });
 };
 
-// DELETE /api/users/me
 export const DELETE = async () => {
+  await connectDB();   // ✔ Runtime only
+
   const sessionUser = await getUserFromRequest();
   if (!sessionUser)
     return new Response(JSON.stringify({ error: "Not authenticated" }), { status: 401 });
