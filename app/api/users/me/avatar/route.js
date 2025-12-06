@@ -1,54 +1,48 @@
-// src/pages/api/users/me/avatar.js
-import connectDB from "@/lib/db";
+import { connectDB } from "@/lib/db";
 import User from "@/models/user";
-import multer from "multer";
-import nextConnect from "next-connect";
-import fs from "fs";
-import path from "path";
 import { requireAuth } from "@/middleware/requireAuth";
+import { NextResponse } from "next/server";
+import fs from "fs/promises";
+import path from "path";
 
-// Configure multer storage
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: "./public/uploads/avatars", // store locally
-    filename: (req, file, cb) => {
-      const ext = path.extname(file.originalname);
-      cb(null, `${Date.now()}-${file.fieldname}${ext}`);
-    },
-  }),
-  fileFilter: (req, file, cb) => {
-    if (!file.mimetype.startsWith("image/")) return cb(new Error("Only images allowed"));
-    cb(null, true);
-  },
-});
-
-const handler = nextConnect();
-
-handler.use(upload.single("avatar")); // 'avatar' is field name
-
-handler.put(async (req, res) => {
+export async function PUT(req) {
   await connectDB();
-  const sessionUser = await requireAuth(req, res);
-  if (!sessionUser) return;
+
+  const sessionUser = await requireAuth(req);
+  if (!sessionUser) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   try {
-    const filePath = `/uploads/avatars/${req.file.filename}`;
+    const formData = await req.formData();
+    const file = formData.get("avatar");
+
+    if (!file) {
+      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+    }
+
+    // Convert file to buffer
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+
+    // Ensure folder exists
+    const uploadDir = path.join(process.cwd(), "public/uploads/avatars");
+    await fs.mkdir(uploadDir, { recursive: true });
+
+    const filePath = path.join(uploadDir, `${Date.now()}-${file.name}`);
+    await fs.writeFile(filePath, buffer);
+
+    const publicPath = `/uploads/avatars/${path.basename(filePath)}`;
+
     const user = await User.findByIdAndUpdate(
       sessionUser.id,
-      { avatar: filePath },
+      { avatar: publicPath },
       { new: true }
     ).select("-password");
-    res.status(200).json(user);
+
+    return NextResponse.json(user);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Upload failed" });
+    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
-});
-
-export const config = {
-  api: {
-    bodyParser: false, // required for multer
-  },
-};
-
-export default handler;
+}
