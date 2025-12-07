@@ -1,12 +1,11 @@
 // app/layout.jsx
-"use client";
 
 import { SessionProvider } from "next-auth/react";
 import AuthProvider from "@/rev/AuthContext";
 import {CartProvider} from "@/rev/CartContext";
 import NavBar from "@/ui/NavBar";
 import FloatingContact from "@/ui/floatingcontact";
-import './globals.css';
+import '@/app/globals.css';
 
 export default function RootLayout({ children }) {
   return (

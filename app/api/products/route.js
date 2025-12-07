@@ -11,13 +11,14 @@ export async function GET(request) {
 
     const url = new URL(request.url);
     const search = url.searchParams.get("search") || "";
-    const owner = url.searchParams.get("owner") || ""; // optional filter by seller
+    const sellerId = url.searchParams.get("sellerId") || "";
 
     let query = {};
     if (search) query.title = { $regex: search, $options: "i" };
-    if (owner) query.owner = owner;
+    if (sellerId) query.sellerId = sellerId;
 
     const products = await Product.find(query).sort({ createdAt: -1 });
+
     return NextResponse.json(products);
   } catch (err) {
     console.error("Fetch Products Error:", err);
@@ -28,7 +29,8 @@ export async function GET(request) {
 export async function POST(request) {
   try {
     const session = await auth(request);
-    if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session?.user?.id)
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     await connectDB();
     const formData = await request.formData();
@@ -39,7 +41,7 @@ export async function POST(request) {
         description: formData.get("description"),
         category: formData.get("category"),
         price: Number(formData.get("price")),
-        owner: session.user.id,
+        sellerId: session.user.id,
       },
       { abortEarly: false }
     );
@@ -53,20 +55,24 @@ export async function POST(request) {
 
     const productData = { ...validation.value, images: [] };
 
-    // Handle multiple images
-    const files = formData.getAll("image"); // <input multiple>
+    const files = formData.getAll("image");
     for (const file of files) {
       if (file && typeof file === "object") {
         const buffer = Buffer.from(await file.arrayBuffer());
-        const uploaded = await uploadImage(buffer); // Cloudinary upload
+        const uploaded = await uploadImage(buffer);
         productData.images.push(uploaded.secure_url);
       }
     }
 
     const newProduct = await Product.create(productData);
-    return NextResponse.json({ success: true, product: newProduct }, { status: 201 });
+
+    return NextResponse.json(
+      { success: true, product: newProduct },
+      { status: 201 }
+    );
   } catch (err) {
     console.error("Add Product Error:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+

@@ -1,4 +1,5 @@
 "use client";
+//ui/LogoutButton.jsx
 import { signOut } from "next-auth/react";
 
 export default function LogoutButton() {
