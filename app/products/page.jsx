@@ -4,29 +4,32 @@ import { useContext, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "@/lib/axiosInstance";
 import ProductCard from "@/ui/ProductCard";
+import SkeletonCard from "@/ui/SkeletonCard";
 import { CartContext } from "@/rev/CartContext";
+import { motion } from "framer-motion";
 
 export default function ProductsPage() {
   const { cartItems, addToCart, removeFromCart } = useContext(CartContext);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
 
   useEffect(() => {
     async function fetchProducts() {
       setLoading(true);
+
       try {
         const queryString = searchQuery
           ? `?search=${encodeURIComponent(searchQuery)}`
           : "";
 
-        // Fixed — API path must be "/api/products"
         const res = await axios.get(`/products${queryString}`);
 
         setProducts(res.data);
-      } catch (err) {
-        console.error("Failed fetching products:", err);
+      } catch (error) {
+        console.error("Error fetching products:", error);
       } finally {
         setLoading(false);
       }
@@ -35,9 +38,9 @@ export default function ProductsPage() {
     fetchProducts();
   }, [searchQuery]);
 
-  const handleCartToggle = (product) => {
-    const inCart = cartItems.some((item) => item._id === product._id);
-    inCart ? removeFromCart(product._id) : addToCart(product);
+  const toggleCart = (product) => {
+    const alreadyInCart = cartItems.some((i) => i._id === product._id);
+    alreadyInCart ? removeFromCart(product._id) : addToCart(product);
   };
 
   return (
@@ -47,21 +50,32 @@ export default function ProductsPage() {
       </h1>
 
       {loading ? (
-        <p className="text-center text-gray-500">Loading products...</p>
+        <div className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
       ) : products.length === 0 ? (
-        <p className="text-center text-gray-600 mt-10">No products found.</p>
+        <p className="text-center text-gray-500 mt-16 text-lg">
+          No products found.
+        </p>
       ) : (
-        <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <motion.div
+          className="grid gap-6 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+        >
           {products.map((p) => (
             <ProductCard
               key={p._id}
               product={p}
-              addToCart={handleCartToggle}
-              inCart={cartItems.some((item) => item._id === p._id)}
+              addToCart={() => toggleCart(p)}
               removeFromCart={removeFromCart}
+              inCart={cartItems.some((i) => i._id === p._id)}
             />
           ))}
-        </div>
+        </motion.div>
       )}
     </section>
   );

@@ -3,35 +3,16 @@ import mongoose from "mongoose";
 const productSchema = new mongoose.Schema(
   {
     sellerId: {
-      type: String, // stores the seller's ID as a string
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
-    title: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    description: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    category: { 
-      type: String,
-      default: null
-    },
-    images: {
-      type: [String], // array of image URLs
-      required: true,
-    },
-    price: {
-      type: Number,
-      required: true,
-    },
-    discountPrice: {
-      type: Number,
-      default: 0,
-    },
+    title: { type: String, required: true, trim: true },
+    description: { type: String, required: true, trim: true },
+    category: { type: String, default: null },
+    images: { type: [String], required: true },
+    price: { type: Number, required: true },
+    discountPrice: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

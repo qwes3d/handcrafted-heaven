@@ -47,10 +47,11 @@ export async function GET(req, ctx) {
   if (!seller || seller.role !== "seller") {
     return NextResponse.json({ error: "Seller not found" }, { status: 404 });
   }
-
-  const products = await Product.find({ sellerId: seller._id.toString() }).sort({ createdAt: -1 });
-
-  return NextResponse.json({
+  const products = await Product.find({ sellerId:id })
+  .populate("sellerId", "firstName lastName avatar address phone bio profilePic") // only fetch needed fields
+   .sort({ createdAt: -1 }); 
+   
+   return NextResponse.json({
     seller: {
       ...seller.toObject(),
       profilePic: seller.profilePic || "/images/placeholder-avatar.jpg",

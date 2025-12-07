@@ -1,21 +1,8 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import Link from "next/link";
-
-// Helper to transform Cloudinary URL (optional)
-const getCloudinaryUrl = (url, width = 400, height = 300) => {
-  if (!url) return "/images/placeholder.jpg";
-  // Add Cloudinary transformations if URL contains "res.cloudinary.com"
-  if (url.includes("res.cloudinary.com")) {
-    return url.replace(
-      "/upload/",
-      `/upload/w_${width},h_${height},c_fill/`
-    );
-  }
-  return url;
-};
+import { motion } from "framer-motion";
 
 export default function ProductCarousel({ products }) {
   const carouselRef = useRef(null);
@@ -23,42 +10,51 @@ export default function ProductCarousel({ products }) {
 
   useEffect(() => {
     if (carouselRef.current) {
-      const scrollWidth = carouselRef.current.scrollWidth;
-      const offsetWidth = carouselRef.current.offsetWidth;
-      setDragWidth(scrollWidth - offsetWidth);
+      const totalScroll = carouselRef.current.scrollWidth;
+      const visibleWidth = carouselRef.current.offsetWidth;
+      setDragWidth(totalScroll - visibleWidth);
     }
   }, [products]);
 
   return (
-    <div className="overflow-hidden relative py-8">
-      <motion.div
-        ref={carouselRef}
-        className="flex gap-4 cursor-grab"
-        drag="x"
-        dragConstraints={{ left: -dragWidth, right: 0 }}
-        whileTap={{ cursor: "grabbing" }}
-      >
-        {products.map((p) => (
-          <motion.div
-            key={p._id}
-            className="min-w-[250px] sm:min-w-[300px] md:min-w-[350px] bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition"
-            whileHover={{ scale: 1.05 }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            <Link href={`/products/${p._id}`} className="block">
-              <img
-                src={getCloudinaryUrl(p.images?.[0])}
-                alt={p.title}
-                className="w-full h-48 sm:h-56 md:h-64 object-cover"
-              />
-              <div className="p-4">
-                <h3 className="font-semibold text-lg mb-2">{p.title}</h3>
-                <p className="text-yellow-600 font-bold">${p.price}</p>
-              </div>
-            </Link>
-          </motion.div>
-        ))}
-      </motion.div>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="py-6"
+    >
+      <h2 className="text-2xl font-bold mb-4 text-gray-900">
+        Top Products
+      </h2>
+
+      <div className="overflow-hidden">
+        <motion.div
+          ref={carouselRef}
+          drag="x"
+          dragConstraints={{ right: 0, left: -dragWidth }}
+          className="flex gap-6 px-2 cursor-grab active:cursor-grabbing"
+        >
+          {products.map((p) => (
+            <motion.div
+              key={p._id}
+              className="min-w-[240px] sm:min-w-[280px] md:min-w-[320px] bg-white shadow-lg rounded-xl overflow-hidden hover:shadow-2xl transition"
+              whileHover={{ scale: 1.05 }}
+            >
+              <Link href={`/products/${p._id}`}>
+                <img
+                  src={p.images?.[0]}
+                  className="w-full h-48 object-cover"
+                  alt={p.title}
+                />
+                <div className="p-4">
+                  <h3 className="font-semibold text-lg">{p.title}</h3>
+                  <p className="text-indigo-600 font-bold">${p.price}</p>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </motion.div>
   );
 }

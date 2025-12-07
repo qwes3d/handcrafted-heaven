@@ -26,7 +26,7 @@ export default function SellerDashboard() {
 
     try {
       setLoading(true);
-      const res = await axios.get(`/api/products?sellerId=${user.id}`);
+      const res = await axios.get(`/products?sellerId=${user.id}`);
       setProducts(res.data);
     } catch (err) {
       console.error("Failed to load products:", err);
