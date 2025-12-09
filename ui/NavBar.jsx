@@ -1,13 +1,12 @@
-"use client";
+'use client';
 
 import Link from "next/link";
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import { useSession } from "next-auth/react";
 import { FiShoppingCart, FiMenu, FiX, FiSearch } from "react-icons/fi";
 import { useRouter } from "next/navigation";
-import axios from "@/lib/axiosInstance";
-import LogoutButton from "@/ui/LogoutButton";
 import { CartContext } from "@/rev/CartContext";
+import LogoutButton from "@/ui/LogoutButton";
 
 export default function NavBar() {
   const { data: session } = useSession();
@@ -16,28 +15,12 @@ export default function NavBar() {
   const { cartItems } = useContext(CartContext);
   const cartCount = cartItems.length;
 
-  const [open, setOpen] = useState(false);          // mobile menu
-  const [showSearch, setShowSearch] = useState(false); // mobile search toggle
-  const [categories, setCategories] = useState([]);
+  const [open, setOpen] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   const router = useRouter();
 
-  // Fetch categories
-  useEffect(() => {
-    async function fetchCategories() {
-      try {
-        const res = await axios.get("/products");
-        const uniqueCategories = [...new Set(res.data.map((p) => p.category).filter(Boolean))];
-        setCategories(uniqueCategories);
-      } catch (err) {
-        console.error("Error fetching categories:", err);
-      }
-    }
-    fetchCategories();
-  }, []);
-
-  // Handle Search
   const handleSearch = (e) => {
     e.preventDefault();
     if (!searchQuery.trim()) return;
@@ -46,14 +29,11 @@ export default function NavBar() {
   };
 
   return (
-    <header className="bg-white shadow sticky top-0 z-50 w-full overflow-x-hidden">
-      <a href="#main-content" className="sr-only focus:not-sr-only">Skip to main content</a>
+    <header className="bg-white shadow sticky top-0 z-50 w-full">
+      <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center justify-between">
 
-      <div className="max-w-screen-xl mx-auto px-4 py-3 flex items-center justify-between w-full">
-        
         {/* LEFT: Logo + Hamburger */}
         <div className="flex items-center gap-3">
-          {/* Hamburger */}
           <button
             onClick={() => setOpen(!open)}
             className="md:hidden text-2xl text-gray-700 p-1"
@@ -62,39 +42,19 @@ export default function NavBar() {
             {open ? <FiX /> : <FiMenu />}
           </button>
 
-          {/* Logo */}
-          <Link href="/" className="text-xl font-bold text-gray-900 whitespace-nowrap">
+          <Link href="/" className="text-xl font-bold text-gray-900">
             Handcrafted Haven
           </Link>
         </div>
 
-        {/* DESKTOP NAV */}
-        <nav className="hidden md:flex items-center gap-6 text-gray-900 font-semibold">
-          <div className="relative group">
-            <button className="px-3 py-2 hover:text-indigo-600 flex items-center gap-1">
-              Categories ▼
-            </button>
+        {/* CENTER: About Us link (desktop) */}
+        <div className="hidden md:flex items-center gap-6">
+          <Link href="/about-us" className="hover:text-indigo-600 font-semibold">
+            About Us
+          </Link>
+        </div>
 
-            {/* Dropdown */}
-            <ul className="absolute left-0 mt-2 w-48 bg-white border rounded-lg shadow-lg hidden group-hover:block z-20">
-              {categories.map((c) => (
-                <li key={c}>
-                  <Link
-                    href={`/category/${c.toLowerCase()}`}
-                    className="block px-4 py-2 hover:bg-gray-100"
-                  >
-                    {c}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <Link href="/about-us" className="hover:text-indigo-600">About Us</Link>
-          <Link href="/contact-us" className="hover:text-indigo-600">Contact Us</Link>
-        </nav>
-
-        {/* RIGHT: Search toggle (mobile) + Cart + User */}
+        {/* RIGHT: Search + User + Cart */}
         <div className="flex items-center gap-4">
 
           {/* Mobile search toggle */}
@@ -106,11 +66,8 @@ export default function NavBar() {
             <FiSearch />
           </button>
 
-          {/* Desktop Search Bar */}
-          <form
-            onSubmit={handleSearch}
-            className="hidden md:flex items-center max-w-md w-full"
-          >
+          {/* Desktop search */}
+          <form onSubmit={handleSearch} className="hidden md:flex items-center max-w-md w-full">
             <input
               type="search"
               placeholder="Search..."
@@ -123,38 +80,24 @@ export default function NavBar() {
             </button>
           </form>
 
-          {/* User Logged In */}
+          {/* Desktop User Links */}
           {user ? (
-            <>
-              {user.role === "user" && (
-                <Link href="/become-seller" className="hidden md:block hover:text-indigo-600">
-                  Become Seller
-                </Link>
-              )}
-
-              <Link href="/profile" className="hidden md:block hover:text-indigo-600">
-                {user.firstName || user.email}
-              </Link>
-
-              {user.role === "seller" && (
-                <Link href="/sellers/dashboard" className="hidden md:block hover:text-indigo-600">
-                  Seller Dashboard
-                </Link>
-              )}
-
-              {/* Logout */}
+            <div className="hidden md:flex items-center gap-3">
+              {user.role === "user" && <Link href="/become-seller" className="hover:text-indigo-600">Become Seller</Link>}
+              <Link href="/profile" className="hover:text-indigo-600">{user.firstName || user.email}</Link>
+              {user.role === "seller" && <Link href="/sellers/dashboard" className="hover:text-indigo-600">Seller Dashboard</Link>}
               <LogoutButton />
-            </>
+            </div>
           ) : (
-            <>
-              <Link href="/login" className="hidden md:block hover:text-indigo-600">Sign In</Link>
-              <Link href="/register" className="hidden md:block hover:text-indigo-600">Register</Link>
-            </>
+            <div className="hidden md:flex items-center gap-3">
+              <Link href="/login" className="hover:text-indigo-600">Sign In</Link>
+              <Link href="/register" className="hover:text-indigo-600">Register</Link>
+            </div>
           )}
 
           {/* Cart */}
           <Link href="/cart" className="relative p-2">
-            <FiShoppingCart className="text-2xl" />
+            <FiShoppingCart className="text-2xl text-gray-700" />
             {cartCount > 0 && (
               <span className="absolute -top-1 -right-2 bg-red-600 text-white text-xs px-1 rounded-full">
                 {cartCount}
@@ -164,9 +107,9 @@ export default function NavBar() {
         </div>
       </div>
 
-      {/* MOBILE SEARCH BAR (SLIDE DOWN) */}
+      {/* MOBILE SEARCH */}
       {showSearch && (
-        <div className="md:hidden bg-white border-t px-4 py-3 animate-slide-in">
+        <div className="md:hidden bg-white border-t px-4 py-3">
           <form onSubmit={handleSearch} className="flex w-full">
             <input
               type="search"
@@ -182,19 +125,9 @@ export default function NavBar() {
 
       {/* MOBILE MENU */}
       {open && (
-        <nav className="md:hidden bg-white border-t px-4 py-4 space-y-3 animate-slide-in">
+        <nav className="md:hidden bg-white border-t px-4 py-4 space-y-3">
           <Link href="/about-us" className="block py-2">About Us</Link>
           <Link href="/contact-us" className="block py-2">Contact Us</Link>
-
-          {categories.map((c) => (
-            <Link
-              key={c}
-              href={`/category/${c.toLowerCase()}`}
-              className="block py-2"
-            >
-              {c}
-            </Link>
-          ))}
 
           {!user && (
             <>
@@ -206,9 +139,7 @@ export default function NavBar() {
           {user && (
             <>
               <Link href="/profile" className="block py-2">Profile</Link>
-              {user.role === "seller" && (
-                <Link href="/sellers/dashboard" className="block py-2">Seller Dashboard</Link>
-              )}
+              {user.role === "seller" && <Link href="/sellers/dashboard" className="block py-2">Seller Dashboard</Link>}
               <LogoutButton />
             </>
           )}

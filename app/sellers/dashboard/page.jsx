@@ -54,23 +54,36 @@ export default function SellerDashboard() {
     setFormState({});
   }
 
-  /** Save edits, including multiple images */
+  /** Upload new images */
+  async function uploadImages(files) {
+    if (!files || files.length === 0) return [];
+    const data = new FormData();
+    files.forEach((file) => data.append("image", file));
+
+    const res = await axios.post("/sellers/products/upload", data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data.uploadedImages; // array of URLs
+  }
+
+  /** Save edits including images */
   async function saveEdit(id) {
     try {
       setSavingId(id);
-      const data = new FormData();
-      data.append("title", formState.title);
-      data.append("description", formState.description);
-      data.append("category", formState.category);
-      data.append("price", formState.price);
 
-      // Append new files if any
-      if (formState.files?.length > 0) {
-        formState.files.forEach((file) => data.append("image", file));
-      }
+      // 1️⃣ Upload new images if any
+      const newImageUrls = await uploadImages(formState.files);
 
-      await axios.put(`/sellers/update/${id}`, data, {
-        headers: { "Content-Type": "multipart/form-data" },
+      // 2️⃣ Merge with existing images
+      const images = [...(formState.existingImages || []), ...newImageUrls];
+
+      // 3️⃣ Send updated product data
+      await axios.put(`/sellers/products/edit/${id}`, {
+        title: formState.title,
+        description: formState.description,
+        category: formState.category,
+        price: formState.price,
+        images,
       });
 
       await loadProducts();
@@ -87,7 +100,7 @@ export default function SellerDashboard() {
   async function deleteProduct(id) {
     if (!confirm("Delete this product?")) return;
     try {
-      await axios.delete(`/sellers/delete/${id}`);
+      await axios.delete(`/sellers/products/delete/${id}`);
       setProducts((prev) => prev.filter((p) => p._id !== id));
     } catch (err) {
       alert("Delete failed");
@@ -97,10 +110,13 @@ export default function SellerDashboard() {
   /** Handle file input change */
   function handleFileChange(e) {
     const files = Array.from(e.target.files);
-    setFormState((s) => ({ ...s, files }));
-
     const previews = files.map((file) => URL.createObjectURL(file));
-    setFormState((s) => ({ ...s, imagePreviews: [...(s.existingImages || []), ...previews] }));
+
+    setFormState((s) => ({
+      ...s,
+      files,
+      imagePreviews: [...(s.existingImages || []), ...previews],
+    }));
   }
 
   if (!user) return <p>Please log in</p>;
@@ -172,7 +188,11 @@ export default function SellerDashboard() {
                     {/* Image previews */}
                     <div className="flex flex-wrap gap-2 mb-2">
                       {formState.imagePreviews?.map((img, idx) => (
-                        <img key={idx} src={img} className="h-20 w-20 object-cover rounded" />
+                        <img
+                          key={idx}
+                          src={img}
+                          className="h-20 w-20 object-cover rounded"
+                        />
                       ))}
                     </div>
 

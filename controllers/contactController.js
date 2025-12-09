@@ -2,11 +2,11 @@ import Contact from "../models/contact.js";
 
 // CREATE CONTACT
 export async function createContact(data) {
-  const { name, email, message } = data;
+  const { name, email, message, subject } = data;
 
   if (!name || !email || !message) throw new Error("All fields are required");
 
-  const contact = await Contact.create({ name, email, message });
+  const contact = await Contact.create({ name, email, message, subject });
 
   return { message: "Contact submitted successfully", contact };
 }

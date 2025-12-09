@@ -49,6 +49,36 @@ export default function PersonalInfoForm({ userData, canEdit, onChange }) {
           className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100"
         />
       </div>
+      <div className="md:col-span-2">
+        <label className="block font-medium text-gray-700 mb-1">Bio</label>
+        <textarea
+          name="bio"
+          value={userData.bio || ""}
+          onChange={handleChange}
+          disabled={!canEdit}
+          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100"
+        ></textarea>  
+      </div>
+      <div className="md:col-span-2">
+        <label className="block font-medium text-gray-700 mb-1">Address</label>
+        <input
+          name="address"
+          value={userData.address || ""}
+          onChange={handleChange}
+          disabled={!canEdit}
+          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100"
+        />
+      </div>
+      <div className="md:col-span-2">
+        <label className="block font-medium text-gray-700 mb-1">Business Name</label>
+        <input
+          name="businessName"
+          value={userData.businessName || ""}
+          onChange={handleChange}
+          disabled={!canEdit}
+          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100"
+        />
+      </div>
     </div>
   );
 }

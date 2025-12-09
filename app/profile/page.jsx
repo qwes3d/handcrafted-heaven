@@ -1,5 +1,4 @@
 "use client";
-//app/profile/page.jsx
 import { useState, useEffect } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -9,6 +8,7 @@ import AvatarUploader from "@/ui/profile/AvatarUploader";
 import PersonalInfoForm from "@/ui/profile/PersonalInfoForm";
 import PasswordChangeForm from "@/ui/profile/PasswordChangeForm";
 import ProfileActions from "@/ui/profile/ProfileActions";
+import ProfileReadOnly from "@/ui/profile/ProfileReadOnly"; // ← ADD THIS
 
 export default function ProfilePage() {
   const { data: session, status } = useSession();
@@ -34,15 +34,18 @@ export default function ProfilePage() {
       const res = await axios.get("/users/me");
       setUserData(res.data);
     } catch (err) {
-      console.error(err);
       setError("Failed to load user data");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFieldChange = (name, value) => setUserData(prev => ({ ...prev, [name]: value }));
-  const handlePasswordChange = (name, value) => setPasswords(prev => ({ ...prev, [name]: value }));
+  const handleFieldChange = (name, value) =>
+    setUserData(prev => ({ ...prev, [name]: value }));
+
+  const handlePasswordChange = (name, value) =>
+    setPasswords(prev => ({ ...prev, [name]: value }));
+
   const handleFileSelect = (file) => setFile(file);
 
   const handleSave = async () => {
@@ -63,6 +66,7 @@ export default function ProfilePage() {
 
       await axios.put("/users/me", { ...userData, profilePic: avatarUrl });
 
+      // handle password change
       if (passwords.current && passwords.new) {
         if (passwords.new !== passwords.confirm) {
           setError("New passwords do not match");
@@ -75,10 +79,19 @@ export default function ProfilePage() {
         });
       }
 
+      // success message
       alert("Profile updated successfully");
+
+      // reset
       setPasswords({ current: "", new: "", confirm: "" });
       setFile(null);
-      setUserData(prev => ({ ...prev, profilePic: avatarUrl }));
+
+      // 🚨 ROLE-BASED REDIRECT AFTER SAVE
+    if (updatedUser.role === "seller") {
+      router.push("/sellers/dashboard");
+    } else {
+      router.push("/");
+    }
     } catch (err) {
       console.error(err);
       setError("Failed to update profile");
@@ -89,39 +102,58 @@ export default function ProfilePage() {
 
   const handleDelete = async () => {
     if (!confirm("Are you sure you want to delete your account? This cannot be undone.")) return;
+
     try {
       await axios.delete("/users/me");
       alert("Account deleted");
       signOut({ callbackUrl: "/" });
-    } catch (err) {
-      console.error(err);
+    } catch {
       alert("Failed to delete account");
     }
   };
 
-  if (loading || status === "loading") return <p className="text-center mt-20 text-gray-500">Loading...</p>;
-  if (!userData) return <p className="text-center mt-20 text-gray-500">No user data found</p>;
+  if (loading || status === "loading")
+    return <p className="text-center mt-20 text-gray-500">Loading...</p>;
+
+  if (!userData)
+    return <p className="text-center mt-20 text-gray-500">No user data found</p>;
 
   return (
-    <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <h1 className="text-3xl sm:text-4xl font-bold mb-8 text-gray-800">My Profile</h1>
-      <div className="bg-white shadow-xl rounded-2xl p-6 sm:p-8 space-y-8">
+    <main className="max-w-5xl mx-auto px-4 py-10 space-y-8">
+      <h1 className="text-3xl font-bold">My Profile</h1>
+
+      {/* READ ONLY SECTION */}
+      <ProfileReadOnly user={userData} />
+
+      <div className="bg-white shadow-xl rounded-2xl p-8 space-y-8">
         {error && <p className="text-red-600 font-medium">{error}</p>}
 
-        <div className="flex flex-col md:flex-row md:items-center md:space-x-8 space-y-6 md:space-y-0">
+        <div className="flex flex-col md:flex-row md:space-x-8 space-y-6 md:space-y-0">
           <AvatarUploader
             canEdit={canEdit}
             currentAvatar={userData.profilePic}
             onFileSelect={handleFileSelect}
           />
+
           <div className="flex-1">
-            <PersonalInfoForm userData={userData} canEdit={canEdit} onChange={handleFieldChange} />
+            <PersonalInfoForm
+              userData={userData}
+              canEdit={canEdit}
+              onChange={handleFieldChange}
+            />
           </div>
         </div>
 
-        {canEdit && <PasswordChangeForm passwords={passwords} onChange={handlePasswordChange} />}
+        {canEdit && (
+          <PasswordChangeForm passwords={passwords} onChange={handlePasswordChange} />
+        )}
 
-        <ProfileActions canEdit={canEdit} saving={saving} onSave={handleSave} onDelete={handleDelete} />
+        <ProfileActions
+          canEdit={canEdit}
+          saving={saving}
+          onSave={handleSave}
+          onDelete={handleDelete}
+        />
       </div>
     </main>
   );

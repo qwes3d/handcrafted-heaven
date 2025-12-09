@@ -1,7 +1,7 @@
 // app/api/become-seller/route.js
 import { connectDB } from "@/lib/db";
 import User from "@/models/user";
-import { auth } from "@/lib/authconfig";
+import { authHandler } from "@/lib/authconfig";
 import { NextResponse } from "next/server";
 import { v2 as cloudinary } from "cloudinary";
 
@@ -18,7 +18,7 @@ export async function POST(req) {
   try {
     await connectDB();
 
-    const session = await auth();
+    const session = await authHandler();
     if (!session || !session.user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 

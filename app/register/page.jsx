@@ -12,6 +12,7 @@ export default function RegisterPage() {
     lastName: "",
     businessName: "",
     address: "",
+    bio: "",
     email: "",
     phone: "",
     password: "",
@@ -50,6 +51,8 @@ export default function RegisterPage() {
       } else if (role === "seller") {
         payload.businessName = form.businessName;
         payload.address = form.address;
+        payload.bio = form.bio;
+        payload.phone = form.phone;
       }
 
       const res = await fetch("/api/auth/register", {
@@ -140,6 +143,16 @@ export default function RegisterPage() {
                   value={form.businessName}
                   onChange={handleChange}
                   required
+                  className="w-full border rounded-md px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div>
+                <label className="block mb-1 font-medium text-gray-700">Bio</label>
+                <textarea
+                  name="bio"
+                  value={form.bio}
+                  onChange={handleChange}
+                  required  
                   className="w-full border rounded-md px-3 py-2 text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>

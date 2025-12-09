@@ -48,7 +48,7 @@ export async function GET(req, ctx) {
     return NextResponse.json({ error: "Seller not found" }, { status: 404 });
   }
   const products = await Product.find({ sellerId:id })
-  .populate("sellerId", "firstName lastName avatar address phone bio profilePic") // only fetch needed fields
+  .populate("sellerId", "firstName lastName businessName address phone bio profilePic") // only fetch needed fields
    .sort({ createdAt: -1 }); 
    
    return NextResponse.json({

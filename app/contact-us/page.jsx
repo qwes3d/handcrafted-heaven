@@ -7,7 +7,7 @@ import axios from "@/lib/axiosInstance";
 import FloatingContact from "@/ui/floatingcontact";
 
 export default function ContactUs() {
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", message: "", subject: "" });
   const [toast, setToast] = useState({ message: "", type: "" });
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -18,7 +18,7 @@ export default function ContactUs() {
       const res = await axios.post("/contact", form);
       if (res.data?.message) {
         setToast({ message: res.data.message, type: "success" });
-        setForm({ name: "", email: "", message: "" });
+        setForm({ name: "", email: "",subject: "", message: "" });
       }
     } catch (err) {
       setToast({ message: err.response?.data?.error || "Failed to submit", type: "error" });
@@ -44,6 +44,15 @@ export default function ContactUs() {
           className="w-full p-3 border rounded-lg text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
         <input
+          type="text"
+          name="Subject"
+          placeholder="Subject"
+          value={form.subject}          
+          onChange={handleChange}
+          required
+          className="w-full p-3 border rounded-lg text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+        />
+        <input
           type="email"
           name="email"
           placeholder="Your Email"
@@ -52,6 +61,7 @@ export default function ContactUs() {
           required
           className="w-full p-3 border rounded-lg text-base font-semibold text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
+        
         <textarea
           name="message"
           placeholder="Your Message"

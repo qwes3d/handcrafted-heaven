@@ -61,7 +61,7 @@ export async function PUT(req) {
       // Upload to Cloudinary
       const uploadResult = await new Promise((resolve, reject) => {
         cloudinary.uploader.upload_stream(
-          { folder: "avatars" },
+          { folder: "sellers/profilePics" },
           (err, result) => {
             if (err) reject(err);
             else resolve(result);

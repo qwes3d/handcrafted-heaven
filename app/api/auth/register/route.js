@@ -8,10 +8,10 @@ export async function POST(req) {
   try {
     await connectDB();
 
-    const { firstName, lastName, businessName, address, email, phone, password, role } = await req.json();
+    const { firstName, lastName, businessName, address, email, phone, password, bio, role } = await req.json();
 
     // Basic validation
-    if (!email || !password || !role || (role === "user" && (!firstName || !lastName)) || (role === "seller" && (!businessName || !address))) {
+    if (!email || !password || !role || (role === "user" && (!firstName || !lastName)) || (role === "seller" && (!businessName || !address || !bio || !phone))) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -30,6 +30,7 @@ export async function POST(req) {
       lastName,
       businessName: role === "seller" ? businessName : undefined,
       address: role === "seller" ? address : undefined,
+      bio: role === "seller" ? bio : undefined,
       email,
       phone,
       password: hashedPassword,
@@ -45,6 +46,7 @@ export async function POST(req) {
           firstName: newUser.firstName,
           lastName: newUser.lastName,
           businessName: newUser.businessName,
+          address: newUser.address,
           email: newUser.email,
           role: newUser.role,
           isSeller: newUser.isSeller,

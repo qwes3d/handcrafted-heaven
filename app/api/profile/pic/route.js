@@ -19,8 +19,8 @@ export async function POST(req) {
   try {
     await connectDB();
 
-    const sessionUser = await getUserFromRequest();
-    if (!sessionUser) {
+    const user = await getUserFromRequest();
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -32,28 +32,24 @@ export async function POST(req) {
     }
 
     // Convert file to buffer
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const buffer = Buffer.from(await file.arrayBuffer());
 
     // Upload to Cloudinary
     const uploaded = await new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(
-        { folder: "avatars" },
-        (err, result) => {
-          if (err) reject(err);
-          else resolve(result);
-        }
+        { folder: "sellers/profilePics" },
+        (err, result) => (err ? reject(err) : resolve(result))
       ).end(buffer);
     });
 
-    const avatarUrl = uploaded.secure_url;
+    const picUrl = uploaded.secure_url;
 
-    // Save URL in DB
-    await User.findByIdAndUpdate(sessionUser.id, { avatar: avatarUrl });
+    // Save to DB using profilePic, NOT avatar
+    await User.findByIdAndUpdate(user.id, { profilePic: picUrl });
 
     return NextResponse.json({
       message: "Profile picture updated",
-      avatar: avatarUrl,
+      profilePic: picUrl,
     });
   } catch (err) {
     console.error("Upload Error:", err);
