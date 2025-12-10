@@ -1,11 +1,10 @@
-// app/api/products/route.js
 import { productCreateSchema } from "@/validation/validators";
 import { connectDB } from "@/lib/db";
 import Product from "@/models/products";
 import { auth } from "@/lib/authconfig";
 import { NextResponse } from "next/server";
 import { uploadImage } from "@/lib/cloudinary";
-
+// app/api/products/route.js
 export async function GET(request) {
   try {
     await connectDB();
@@ -17,37 +16,41 @@ export async function GET(request) {
     const maxPrice = parseFloat(url.searchParams.get("maxPrice"));
     const sellerId = url.searchParams.get("sellerId");
 
+    const top = url.searchParams.get("top") === "true"; 
+    const page = parseInt(url.searchParams.get("page") || "1");
+    const limit = parseInt(url.searchParams.get("limit") || "5");
+    const skip = (page - 1) * limit;
+
     let query = {};
-
-    // Search by title
-    if (search) {
-      query.title = { $regex: search, $options: "i" };
-    }
-
-    // Filter by category
-    if (category) {
-      query.category = category;
-    }
-
-    // Filter by price range
+    if (search) query.title = { $regex: search, $options: "i" };
+    if (category) query.category = category;
     if (!isNaN(minPrice) || !isNaN(maxPrice)) {
       query.price = {};
       if (!isNaN(minPrice)) query.price.$gte = minPrice;
       if (!isNaN(maxPrice)) query.price.$lte = maxPrice;
     }
+    if (sellerId && sellerId.length === 24) query.sellerId = sellerId;
 
-    // Filter by seller
-    if (sellerId && sellerId.length === 24) {
-      query.sellerId = sellerId;
-    }
+    let productsQuery = Product.find(query).sort({ createdAt: -1 });
+    if (top) productsQuery = productsQuery.limit(4);
+    else productsQuery = productsQuery.skip(skip).limit(limit);
 
-    const products = await Product.find(query).sort({ createdAt: -1 });
-    return NextResponse.json(products);
+    const products = await productsQuery.lean();
+    const total = top ? products.length : await Product.countDocuments(query);
+
+    return NextResponse.json({
+      products,
+      total,
+      pages: top ? 1 : Math.ceil(total / limit),
+      page: top ? 1 : page,
+      categories: await Product.distinct("category"),
+    });
   } catch (err) {
     console.error("Fetch Products Error:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
 
 export async function POST(request) {
   try {
@@ -59,7 +62,6 @@ export async function POST(request) {
     await connectDB();
     const formData = await request.formData();
 
-    // Validate input
     const validation = productCreateSchema.validate(
       {
         title: formData.get("title"),
@@ -80,7 +82,6 @@ export async function POST(request) {
 
     const productData = { ...validation.value, images: [] };
 
-    // Upload images
     const files = formData.getAll("image");
     for (const file of files) {
       if (file && typeof file === "object") {
@@ -96,4 +97,4 @@ export async function POST(request) {
     console.error("Add Product Error:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-}
+};
